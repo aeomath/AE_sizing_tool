@@ -18,6 +18,7 @@ class Atmosphere:
 
         Args:
             altitude (float): The altitude of the aircraft in ft .
+            meter (bool, optional): True if the altitude is in meters, False if it is in feet. Defaults to False.
         """
         self.meter = meter
         self.altitude = altitude
