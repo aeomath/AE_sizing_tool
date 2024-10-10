@@ -16,7 +16,14 @@ import Sizing
 
 
 def Thrust_to_weight_ratio(
-    wing_loading, beta, ROC, speed_EAS=None, start_alt=0, end_alt=10000, Mach=None
+    wing_loading,
+    beta,
+    ROC=None,
+    speed_EAS=None,
+    start_alt=0,
+    end_alt=10000,
+    Mach=None,
+    flight_path_angle=None,
 ):
     """
     Calculate the thrust-to-weight ratio for climb.
@@ -34,17 +41,16 @@ def Thrust_to_weight_ratio(
     Returns:
     float: Thrust-to-weight ratio required for climb.
     """
-    ROC = ROC / 60  # Convert ROC from ft/min to ft/s
+    if ROC is not None:
+        ROC = ROC / 60  # Convert ROC from ft/min to ft/s
     sigma_start = Atmosphere(start_alt).density_ratio.value
     sigma_end = Atmosphere(end_alt).density_ratio.value
     sigma = (sigma_start + sigma_end) / 2
     K1 = Aircraft.Aerodynamics.K1.value
     K2 = Aircraft.Aerodynamics.K2.value
-    if Mach:
-        if ROC > 0:
-            print("climbing at constant Mach")
-        else:
-            print("Descending at constant Mach")
+
+    # Case 1: Climb at constant Mach number
+    if Mach is not None:
         ### Climb at constant Mach number
         q_start = (
             0.5
@@ -60,15 +66,19 @@ def Thrust_to_weight_ratio(
         Cd0_start = Sizing.aerodynamics.Assumptions.Cd0(Mach, start_alt)
         Cd0_end = Sizing.aerodynamics.Assumptions.Cd0(Mach, end_alt)
         Cd0 = (Cd0_start + Cd0_end) / 2
-        V_start = utils.Mach_to_TAS(Mach, start_alt)
-        V_end = utils.Mach_to_TAS(Mach, end_alt)
-        V = (V_start + V_end) / 2
         alpha = thrust_lapse(Mach, sigma)
-    if speed_EAS:
-        if ROC > 0:
-            print("climbing at constant EAS")
-        else:
-            print("Descending at constant EAS")
+        ## if flight path angle is not given, use the rate of climb to calculate the climb term
+        if ROC is not None:
+            V_start = utils.Mach_to_TAS(Mach, start_alt)
+            V_end = utils.Mach_to_TAS(Mach, end_alt)
+            V = (V_start + V_end) / 2
+            climb_term = ROC / V
+        ## if flight path angle is given, use it to calculate the climb term
+        elif flight_path_angle is not None:
+            climb_term = np.sin(flight_path_angle * np.pi / 180)
+
+    # Case 2: Climb at constant equivalent airspeed (EAS)
+    if speed_EAS is not None:
         ### Climb at constant EAS speed
         q = (
             0.5
@@ -81,18 +91,29 @@ def Thrust_to_weight_ratio(
         Cd0_end = Sizing.aerodynamics.Assumptions.Cd0(
             utils.KEAS_to_Mach(speed_EAS, end_alt), end_alt
         )
-        V_start = utils.KEAS_to_TAS(speed_EAS, start_alt)  ### TAS  is in knots
-        V_end = utils.KEAS_to_TAS(speed_EAS, end_alt)
         Cd0 = (Cd0_start + Cd0_end) / 2
-        V = utils.knots_to_fts((V_start + V_end) / 2)
+        ### if flight path angle is not given, use the rate of climb to calculate the climb term
+        if ROC is not None:
+            V_start = utils.KEAS_to_TAS(speed_EAS, start_alt)  ### TAS  is in knots
+            V_end = utils.KEAS_to_TAS(speed_EAS, end_alt)
+
+            V = utils.knots_to_fts((V_start + V_end) / 2)
+            climb_term = ROC / V
+        ## if flight path angle is given, use it to calculate the climb term
+        elif flight_path_angle is not None:
+            climb_term = np.sin(flight_path_angle * np.pi / 180)
 
         alpha_star = thrust_lapse(utils.KEAS_to_Mach(speed_EAS, start_alt), sigma_start)
         alpha_end = thrust_lapse(utils.KEAS_to_Mach(speed_EAS, end_alt), sigma_end)
         alpha = (alpha_star + alpha_end) / 2
 
+    if np.all(climb_term) > 0:
+        print("Climbing")
+    else:
+        print("Descending")
     linear_term = K1 * (beta / q) * wing_loading
     Inverse_ter = Cd0 / ((beta / q) * wing_loading)
-    T_W = (beta / alpha) * (linear_term + K2 + Inverse_ter + ROC / V)
+    T_W = (beta / alpha) * (linear_term + K2 + Inverse_ter + climb_term)
     return T_W
 
 
@@ -101,6 +122,7 @@ def Thrust_to_weight_ratio_2(wing_loading, mission_segment: Mission_segments.cli
         wing_loading,
         beta=mission_segment.weight_fraction.value,
         ROC=mission_segment.climb_rate.value,
+        flight_path_angle=mission_segment.flight_path_angle.value,
         speed_EAS=mission_segment.KEAS.value,
         start_alt=mission_segment.start_altitude.value,
         end_alt=mission_segment.end_altitude.value,

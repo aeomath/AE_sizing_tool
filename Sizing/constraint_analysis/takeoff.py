@@ -61,3 +61,21 @@ def Thrust_weight_ratio(
         alpha * rho * Clmax * const.SL_GRAVITY_FT
     )
     return sg_time_thrust_ratio / (st0 - s_obst - sr)
+
+
+def takeoff_EAS_speed(Wing_loading, Clmax, kt0, altitude=0, beta=1):
+    """
+    Calculate the takeoff speed.
+    Parameters:
+    Clmax (float): Maximum lift coefficient.
+    Wing_loading (float): Wing loading.
+    kt0 (float): Takeoff speed factor.
+    altitude (float, optional): Altitude in feet. Default is 0 feet.
+    Returns:
+    float: Takeoff speed in knots.
+    """
+    atm = Atmosphere(altitude)
+    rho = atm.density_slug_ft3.value
+    Vt0 = np.sqrt((kt0**2 * 2 * beta * Wing_loading) / (rho * Clmax))
+    TAS_Knots = utils.fts_to_knots(Vt0)
+    return utils.TAS_to_KEAS(TAS_Knots, altitude)

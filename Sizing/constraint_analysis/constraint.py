@@ -14,62 +14,25 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 
-def constraint_analysis_plot():
-    wing_loading = np.linspace(30, 170, 700)
-    styles = [
-        "solid",
-        "dash",
-        "dot",
-        "dashdot",
-        "solid",
-        "dash",
-        "dot",
-        "dashdot",
-        "solid",
-        "dash",
-        "dot",
-        "dashdot",
-        "solid",
-        "dash",
-        "dot",
-    ]
-    colors = [
-        "blue",
-        "green",
-        "red",
-        "cyan",
-        "magenta",
-        "yellow",
-        "black",
-        "orange",
-        "purple",
-        "brown",
-        "pink",
-        "gray",
-        "olive",
-        "cyan",
-        "lime",
-    ]
+def constraint_analysis_main(plot=False):
+    wing_min = 30
+    wing_max = 170
+    num_points = 700
+    wing_loading = np.linspace(wing_min, wing_max, num_points)
 
+    thrust_to_weight_ratios = []
     fig = go.Figure()
 
     ### Phase 2 ###
     Take_off = Mission_segments.Takeoff(5500, 0.96, 35)
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=takeoff.Thrust_weight_ratio(
-                wing_loading,
-                Take_off.weight_fraction.value,
-                2.56,
-                Take_off.takeoff_distance.value,
-                hobst=Take_off.obstacle_height.value,
-            ),
-            mode="lines",
-            name="Takeoff",
-            line=dict(dash=styles[0], color=colors[0]),
-        )
+    TWR_takeoff = takeoff.Thrust_weight_ratio(
+        wing_loading,
+        Take_off.weight_fraction.value,
+        2.56,
+        Take_off.takeoff_distance.value,
+        hobst=Take_off.obstacle_height.value,
     )
+    thrust_to_weight_ratios.append(TWR_takeoff)
 
     ### Phase 3 ###
     first_climb = Mission_segments.climb(
@@ -80,31 +43,17 @@ def constraint_analysis_plot():
         time=100,
         weight_fraction=0.7,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=climb.Thrust_to_weight_ratio_2(
-                wing_loading=wing_loading, mission_segment=first_climb
-            ),
-            mode="lines",
-            name="First Climb",
-            line=dict(dash=styles[1], color=colors[1]),
-        )
+    TWR_first_climb = climb.Thrust_to_weight_ratio_2(
+        wing_loading=wing_loading, mission_segment=first_climb
     )
+    thrust_to_weight_ratios.append(TWR_first_climb)
 
     ### Phase 4 ###
     acceleration1 = Mission_segments.acceleration(
         KEAS_start=250, KEAS_end=290, time=60, weight_fraction=0.8, altitude=10000
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=acceleration.Thrust_Weight_Ratio(wing_loading, acceleration1),
-            mode="lines",
-            name="Acceleration",
-            line=dict(dash=styles[2], color=colors[2]),
-        )
-    )
+    TWR_acceleration = acceleration.Thrust_Weight_Ratio(wing_loading, acceleration1)
+    thrust_to_weight_ratios.append(TWR_acceleration)
 
     ### Phase 5 ###
     Goal_Mach = 0.78
@@ -118,17 +67,13 @@ def constraint_analysis_plot():
         KEAS=290,
         MACH=None,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=climb.Thrust_to_weight_ratio_2(wing_loading, climb_to_crossover),
-            mode="lines",
-            name="Climb to Crossover",
-            line=dict(dash=styles[3], color=colors[3]),
-        )
+    TWR_climb_to_crossover = climb.Thrust_to_weight_ratio_2(
+        wing_loading, climb_to_crossover
     )
+    thrust_to_weight_ratios.append(TWR_climb_to_crossover)
 
     ### Phase 6 ###
+
     climb_to_cruise = Mission_segments.climb(
         climb_rate=1500,
         start_altitude=crossover_alt,
@@ -138,31 +83,19 @@ def constraint_analysis_plot():
         KEAS=None,
         MACH=0.78,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=climb.Thrust_to_weight_ratio_2(wing_loading, climb_to_cruise),
-            mode="lines",
-            name="Climb to Cruise",
-            line=dict(dash=styles[4], color=colors[4]),
-        )
-    )
+    TWR_climb_to_cruise = climb.Thrust_to_weight_ratio_2(wing_loading, climb_to_cruise)
+    thrust_to_weight_ratios.append(TWR_climb_to_cruise)
 
     ### Phase 7 ###
+
     cruise1 = Mission_segments.cruise(
         altitude=35000, range=500, weight_fraction=0.6, Mach=0.78
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=cruise.Thrust_weight_ratio(wing_loading, cruise1),
-            mode="lines",
-            name="Cruise",
-            line=dict(dash=styles[5], color=colors[5]),
-        )
-    )
+    TWR_cruise = cruise.Thrust_weight_ratio(wing_loading, cruise1)
+    thrust_to_weight_ratios.append(TWR_cruise)
 
     ### Phase 8 ###
+
     descent = Mission_segments.climb(
         climb_rate=-1500,
         start_altitude=35000,
@@ -172,26 +105,12 @@ def constraint_analysis_plot():
         KEAS=250,
         MACH=None,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=climb.Thrust_to_weight_ratio_2(wing_loading, descent),
-            mode="lines",
-            name="Descent1",
-            line=dict(dash=styles[6], color=colors[6]),
-        )
-    )
+    TWR_descent = climb.Thrust_to_weight_ratio_2(wing_loading, descent)
+    thrust_to_weight_ratios.append(TWR_descent)
 
     ### Phase 9 ###
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=0 * wing_loading,
-            mode="lines",
-            name="Deceleration",
-            line=dict(dash=styles[7], color=colors[7]),
-        )
-    )
+    TWR_deceleration = 0 * wing_loading
+    thrust_to_weight_ratios.append(TWR_deceleration)
 
     ### Phase 10 ###
     approach = Mission_segments.approach(
@@ -201,70 +120,45 @@ def constraint_analysis_plot():
         end_altitude=0,
         weight_fraction=0.85,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=approach_landing.thrust_weight_ratio_approach(wing_loading, approach),
-            mode="lines",
-            name="Approach",
-            line=dict(dash=styles[8], color=colors[8]),
-        )
-    )
+    TWR_approach = approach_landing.thrust_weight_ratio_approach(wing_loading, approach)
+    thrust_to_weight_ratios.append(TWR_approach)
 
     ### Phase 11 ###
     Take_off = Mission_segments.Takeoff(5500, 0.6, 0)
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=takeoff.Thrust_weight_ratio(
-                wing_loading,
-                Take_off.weight_fraction.value,
-                2.56,
-                Take_off.takeoff_distance.value,
-                hobst=Take_off.obstacle_height.value,
-            ),
-            mode="lines",
-            name="Go Around",
-            line=dict(dash=styles[9], color=colors[9]),
-        )
+    TWR_go_around = takeoff.Thrust_weight_ratio(
+        wing_loading,
+        Take_off.weight_fraction.value,
+        2.56,
+        Take_off.takeoff_distance.value,
+        hobst=Take_off.obstacle_height.value,
     )
+    thrust_to_weight_ratios.append(TWR_go_around)
 
     ### Phase 12 ###
     cruise_reserve = Mission_segments.cruise(
         altitude=15000, range=200, weight_fraction=0.6, EAS=250
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=cruise.Thrust_weight_ratio(wing_loading, cruise_reserve),
-            mode="lines",
-            name="Cruise Reserve",
-            line=dict(dash=styles[10], color=colors[10]),
-        )
-    )
+    TWR_cruise_reserve = cruise.Thrust_weight_ratio(wing_loading, cruise_reserve)
+    thrust_to_weight_ratios.append(TWR_cruise_reserve)
 
     ### Phase 13 ###
+    print("Loiter")
     loiter = Mission_segments.cruise(
         altitude=15000,
         range=200,
         weight_fraction=0.6,
         EAS=250,
     )
-    T_W_loiter = cruise.Thrust_weight_ratio(
-        wing_loading, loiter, Equi_Speed=cruise.iter_best_L_D_speed(15000, wing_loading)
+    TWR_loiter = cruise.Thrust_weight_ratio(
+        wing_loading,
+        loiter,
+        Equi_Speed=cruise.iter_best_L_D_speed(loiter.altitude.value, wing_loading),
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=T_W_loiter,
-            mode="lines",
-            name="Loiter",
-            line=dict(dash=styles[11], color=colors[11]),
-        )
-    )
+    thrust_to_weight_ratios.append(TWR_loiter)
 
     ### Additional constraints ###
     ### Service Ceiling ###
+
     service_ceiling = 41000
     Mach = 0.78
     ceiling = Mission_segments.climb(
@@ -276,15 +170,8 @@ def constraint_analysis_plot():
         KEAS=None,
         MACH=Mach,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=climb.Thrust_to_weight_ratio_2(wing_loading, ceiling),
-            mode="lines",
-            name="Service Ceiling",
-            line=dict(dash=styles[12], color=colors[12]),
-        )
-    )
+    TWR_service_ceiling = climb.Thrust_to_weight_ratio_2(wing_loading, ceiling)
+    thrust_to_weight_ratios.append(TWR_service_ceiling)
 
     ### Maximum Mach Number ###
     max_Mach = 0.82
@@ -294,33 +181,112 @@ def constraint_analysis_plot():
         weight_fraction=0.75,
         Mach=max_Mach,
     )
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=cruise.Thrust_weight_ratio(wing_loading, maximum_mach_segment),
-            mode="lines",
-            name="Max Mach",
-            line=dict(dash=styles[13], color=colors[13]),
-        )
-    )
+    TWR_max_mach = cruise.Thrust_weight_ratio(wing_loading, maximum_mach_segment)
+    thrust_to_weight_ratios.append(TWR_max_mach)
 
     ### Steep Turn ###
     turn_segment = Mission_segments.cruise(
         altitude=35000, range=500, weight_fraction=0.75, Mach=0.78, bank_angle=45
     )
+    TWR_steep_turn = cruise.Thrust_weight_ratio(wing_loading, turn_segment)
+    thrust_to_weight_ratios.append(TWR_steep_turn)
+
+    ### Climb with one engine ###
+    print("Climb with one engine")
+    gradient_percent = 0.05
+    path_angle = np.arctan(gradient_percent) * 180 / np.pi
+    takeoff_speed = takeoff.takeoff_EAS_speed(
+        wing_loading, Clmax=2.56, kt0=1.3, beta=0.96
+    )
+    # takeoff_speed = 160
+    TWR_climb_one_engine = 2 * climb.Thrust_to_weight_ratio(
+        wing_loading,
+        beta=1,
+        flight_path_angle=path_angle,
+        speed_EAS=takeoff_speed,
+    )
+    thrust_to_weight_ratios.append(TWR_climb_one_engine)
+    phase_names = [
+        "Takeoff",
+        "First Climb",
+        "Acceleration",
+        "Climb to Crossover",
+        "Climb to Cruise",
+        "Cruise",
+        "Descent",
+        "Deceleration",
+        "Approach",
+        "Go Around",
+        "Cruise Reserve",
+        "Loiter",
+        "Service Ceiling",
+        "Maximum Mach Number",
+        "Steep Turn",
+        "Climb with One Engine",
+    ]
+    ### Landing constraint ###
+    landing = Mission_segments.landing(
+        weight_fraction=0.85, KEAS=135, Cl_max=3, k_land=1.3
+    )
+    wing_loading_landing = float(approach_landing.landing_constraint(landing))
+
+    """Find the feasible design space and Design Point"""
+    ## Find the feasibke design space
+    y_max = np.max(thrust_to_weight_ratios, axis=0)
+    # Find the index of the minimum in the envelope curve
+    min_index = np.argmin(y_max)
+    # Retrieve the corresponding x and y values for the minimum point
+    wing_loading_design = wing_loading[min_index]
+    TWR_design = y_max[min_index]
+
+    # If the landing constraint is more restrictive than the design point, update the design point
+    if wing_loading_design > wing_loading_landing:
+        wing_loading_design = wing_loading_landing
+        # Find the index of the wing_loading_landing in the wing_loading array
+        landing_index = np.where(
+            np.abs(wing_loading - wing_loading_landing)
+            <= (wing_max - wing_min) / num_points
+        )[0][0]
+        TWR_design = float(y_max[landing_index])
+        print("Landing constraint is more restrictive than the design point")
+
+    print(
+        f"Design Point: Wing Loading = {wing_loading_design} lb/ft^2, TWR = {TWR_design}"
+    )
+
+    """PLOTS"""
+    for i, TWR in enumerate(thrust_to_weight_ratios):
+        fig.add_trace(
+            go.Scatter(
+                x=wing_loading,
+                y=TWR,
+                mode="lines",
+                name=phase_names[i],
+                line=dict(dash="dash" if i < 7 else "solid"),
+            )
+        )
     fig.add_trace(
         go.Scatter(
             x=wing_loading,
-            y=cruise.Thrust_weight_ratio(wing_loading, turn_segment),
+            y=y_max,
             mode="lines",
-            name="45 deg Turn",
-            line=dict(dash=styles[14], color=colors[14]),
+            name="feasible design space",
+            line=dict(color="green", width=4),
         )
     )
 
-    ### Landing  constraint ###
-    landing = Mission_segments.landing(KEAS=135, weight_fraction=0.85, Cl_max=3)
-    wing_loading_landing = float(approach_landing.landing_constraint(landing))
+    # Remplir l'espace faisable au-dessus de l'enveloppe
+    fig.add_trace(
+        go.Scatter(
+            x=np.concatenate([wing_loading, wing_loading[::-1]]),
+            y=np.concatenate([y_max, np.ones_like(y_max)]),  # Remplir jusqu'à y=1
+            fill="toself",
+            fillcolor="rgba(144, 238, 144, 0.5)",  # Couleur vert clair avec transparence
+            line=dict(color="rgba(255,255,255,0)"),
+            showlegend=False,
+        )
+    )
+
     fig.add_trace(
         go.Scatter(
             x=[wing_loading_landing] * 2,
@@ -337,5 +303,6 @@ def constraint_analysis_plot():
         yaxis_title="Thrust to Weight Ratio",
         legend_title="Mission Segments",
     )
-
-    fig.show()
+    if plot:
+        fig.show()
+    return wing_loading_design, TWR_design

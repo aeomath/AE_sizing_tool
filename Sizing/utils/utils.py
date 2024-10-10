@@ -64,6 +64,11 @@ def KEAS_to_TAS(KEAS, altitude, meter=False):
     return KEAS / np.sqrt(atm.density_ratio.value)
 
 
+def TAS_to_KEAS(TAS, altitude, meter=False):
+    atm = Atmosphere(altitude, meter)
+    return TAS * np.sqrt(atm.density_ratio.value)
+
+
 def Mach_to_TAS(Mach, altitude, meter=False):
     """
     This function calculates the true airspeed (TAS) of the aircraft based on the Mach number.

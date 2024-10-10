@@ -42,7 +42,7 @@ def Best_L_D_speed(altitude, Cd0, Wing_Loading):  ### best lift to drag speed
     return np.sqrt(
         (2 / (Atmosphere(altitude).density_slug_ft3.value))
         * Wing_Loading
-        * np.sqrt(K / (Cd0 * 3))
+        * np.sqrt(K / (Cd0))
     )
 
 
@@ -54,10 +54,10 @@ def iter_best_L_D_speed(altitude, Wing_Loading):
     Mach = 0.5
     for i in range(max_iterations):
         Cd0 = Sizing.aerodynamics.Assumptions.Cd0(Mach, altitude)
-        speed = Best_L_D_speed(altitude, Cd0, Wing_Loading)
+        speed_fts = Best_L_D_speed(altitude, Cd0, Wing_Loading)
+        speed = utils.fts_to_knots(speed_fts)
         new_Mach = utils.KEAS_to_Mach(speed, altitude)
         if np.all(abs(new_Mach - Mach) < tolerance):
-            print("Speed: ", utils.fts_to_knots(speed))
             break
         Mach = new_Mach
-    return utils.fts_to_knots(speed)
+    return speed

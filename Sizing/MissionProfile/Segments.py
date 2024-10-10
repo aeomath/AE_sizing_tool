@@ -20,20 +20,35 @@ class Mission_segments:
 
         def __init__(
             self,
-            climb_rate,
             start_altitude,
             end_altitude,
             time,
             weight_fraction,
             KEAS=None,
             MACH=None,
+            climb_rate=None,
+            flight_path_angle=None,
         ):
+            ### Check that either Mach or EAS is provided
             if KEAS is None and MACH is None:
                 raise ValueError("Either Mach or EAS must be provided")
             if KEAS is not None and MACH is not None:
                 raise ValueError("Either Mach or EAS must be provided")
-            self.climb_rate = Variable("climb_rate", climb_rate, "m/s", "Rate of climb")
             self.KEAS = Variable("KEAS", KEAS, "KEAS", "Equivalent airspeed")
+            self.MACH = Variable("MACH", MACH, "", "Mach number")
+            ## Check that either flight path angle or ROC is provided
+            if climb_rate is None and flight_path_angle is None:
+                raise ValueError(
+                    "Either climb rate or flight path angle must be provided"
+                )
+            if climb_rate is not None and flight_path_angle is not None:
+                raise ValueError(
+                    "Either climb rate or flight path angle must be provided"
+                )
+            self.climb_rate = Variable("climb_rate", climb_rate, "m/s", "Rate of climb")
+            self.flight_path_angle = Variable(
+                "flight_path_angle", flight_path_angle, "deg", "Flight path angle"
+            )
             self.start_altitude = Variable(
                 "start_altitude", start_altitude, "ft", "Start altitude"
             )
@@ -44,7 +59,6 @@ class Mission_segments:
             self.weight_fraction = Variable(
                 "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
             )
-            self.MACH = Variable("MACH", MACH, "", "Mach number")
 
         def is_descent(self):
             return self.climb_rate < 0
@@ -157,9 +171,10 @@ class Mission_segments:
             self.KEAS = Variable("KEAS", KEAS, "KEAS", "Equivalent airspeed")
 
     class landing:
-        def __init__(self, weight_fraction, KEAS, Cl_max):
+        def __init__(self, weight_fraction, KEAS, Cl_max, k_land):
             self.weight_fraction = Variable(
                 "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
             )
             self.KEAS = Variable("KEAS", KEAS, "KEAS", "Equivalent airspeed")
             self.Cl_max = Variable("Cl_max", Cl_max, "", "Max lift coefficient")
+            self.k_land = Variable("k_land", k_land, "", "Landing speed factor")

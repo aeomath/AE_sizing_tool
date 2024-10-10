@@ -44,7 +44,12 @@ def thrust_weight_ratio_approach(
     linear_term = K1 * (beta / q) * wing_loading
     Inverse_ter = Cd0 / ((beta / q) * wing_loading)
     T_W = (beta / alpha) * (
-        linear_term + K2 + Inverse_ter + np.sin(flight_path_angle * np.pi / 180)
+        linear_term
+        + K2
+        + Inverse_ter
+        - np.sin(
+            flight_path_angle * np.pi / 180
+        )  ## negative sign because the flight path angle is negative (descending)
     )
     return T_W
 
@@ -56,4 +61,4 @@ def landing_constraint(Mission: Mission_segments.landing):
         * utils.knots_to_fts(Mission.KEAS.value) ** 2
     )
     Beta = Mission.weight_fraction.value
-    return Mission.Cl_max.value * q / Beta
+    return Mission.Cl_max.value * q / (Beta * Mission.k_land.value**2)

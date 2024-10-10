@@ -61,4 +61,7 @@ def lb_ft2_to_kg_m2(lb_ft2):
 # plt.title("Thrust to Weight Ratio vs Wing Loading, takeoff")
 # plt.fill_between(X, T_W, color="red", alpha=0.3, label="Impossible Region")
 # plt.show()
-constraint.constraint_analysis_plot()
+constraint.constraint_analysis_main(plot=False)
+import Sizing.constraint_analysis.takeoff as takeoff
+
+print(takeoff.takeoff_EAS_speed(100, Clmax=2.56, kt0=1.2))
