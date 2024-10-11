@@ -26,4 +26,4 @@ def TSFC(Mach_inf, Temp_ratio):
     """
     return (
         np.sqrt(Temp_ratio) * Aircraft.Propulsion.ktsfc.value * (0.45 + 0.54 * Mach_inf)
-    )
+    ) / 3600  ## convert from 1/hr to 1/s

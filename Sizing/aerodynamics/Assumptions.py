@@ -1,6 +1,10 @@
 import numpy as np
 from Sizing.Variable_info.variables import Aircraft
 
+### Constants
+K1 = 0.0556
+K2 = -0.0197
+
 
 def Cd0(Mach_inf, altitude):
     """

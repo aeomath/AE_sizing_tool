@@ -1,15 +1,15 @@
-from Sizing.MissionProfile.Segments import Mission_segments
+import Sizing.MissionProfile.Segments as Mission_segments
 import Sizing.utils.Constants as const
-from Sizing.constraint_analysis import (
-    climb,
-    acceleration,
-    takeoff,
-    cruise,
-    approach_landing,
-)
+import Sizing.MissionProfile.Segments.acceleration as acceleration_segment
+import Sizing.MissionProfile.Segments.Cruise as cruise_segment
+import Sizing.MissionProfile.Segments.Climb as climb_segment
+import Sizing.MissionProfile.Segments.Takeoff as takeoff_segment
+import Sizing.MissionProfile.Segments.approach as approach_segment
+import Sizing.MissionProfile.Segments.landing as landing_segment
 import numpy as np
 import matplotlib.pyplot as plt
 
+import Sizing.utils.utils as utils
 
 import plotly.graph_objects as go
 
@@ -24,18 +24,12 @@ def constraint_analysis_main(plot=False):
     fig = go.Figure()
 
     ### Phase 2 ###
-    Take_off = Mission_segments.Takeoff(5500, 0.96, 35)
-    TWR_takeoff = takeoff.Thrust_weight_ratio(
-        wing_loading,
-        Take_off.weight_fraction.value,
-        2.56,
-        Take_off.takeoff_distance.value,
-        hobst=Take_off.obstacle_height.value,
-    )
+    Take_off = takeoff_segment.Takeoff(5500, 0.96, 35)
+    TWR_takeoff = Take_off.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_takeoff)
 
     ### Phase 3 ###
-    first_climb = Mission_segments.climb(
+    first_climb = climb_segment.climb(
         climb_rate=3000,
         KEAS=250,
         start_altitude=0,
@@ -43,22 +37,20 @@ def constraint_analysis_main(plot=False):
         time=100,
         weight_fraction=0.7,
     )
-    TWR_first_climb = climb.Thrust_to_weight_ratio_2(
-        wing_loading=wing_loading, mission_segment=first_climb
-    )
+    TWR_first_climb = first_climb.Thrust_to_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_first_climb)
 
     ### Phase 4 ###
-    acceleration1 = Mission_segments.acceleration(
+    acceleration1 = acceleration_segment.acceleration(
         KEAS_start=250, KEAS_end=290, time=60, weight_fraction=0.8, altitude=10000
     )
-    TWR_acceleration = acceleration.Thrust_Weight_Ratio(wing_loading, acceleration1)
+    TWR_acceleration = acceleration1.Thrust_Weight_Ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_acceleration)
 
     ### Phase 5 ###
     Goal_Mach = 0.78
-    crossover_alt = climb.crossover_altitude(Goal_Mach, 290)
-    climb_to_crossover = Mission_segments.climb(
+    crossover_alt = utils.crossover_altitude(Goal_Mach, 290)
+    climb_to_crossover = climb_segment.climb(
         climb_rate=3000,
         start_altitude=10000,
         end_altitude=crossover_alt,
@@ -67,14 +59,12 @@ def constraint_analysis_main(plot=False):
         KEAS=290,
         MACH=None,
     )
-    TWR_climb_to_crossover = climb.Thrust_to_weight_ratio_2(
-        wing_loading, climb_to_crossover
-    )
+    TWR_climb_to_crossover = climb_to_crossover.Thrust_to_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_climb_to_crossover)
 
     ### Phase 6 ###
 
-    climb_to_cruise = Mission_segments.climb(
+    climb_to_cruise = climb_segment.climb(
         climb_rate=1500,
         start_altitude=crossover_alt,
         end_altitude=35000,
@@ -83,20 +73,20 @@ def constraint_analysis_main(plot=False):
         KEAS=None,
         MACH=0.78,
     )
-    TWR_climb_to_cruise = climb.Thrust_to_weight_ratio_2(wing_loading, climb_to_cruise)
+    TWR_climb_to_cruise = climb_to_cruise.Thrust_to_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_climb_to_cruise)
 
     ### Phase 7 ###
 
-    cruise1 = Mission_segments.cruise(
+    cruise1 = cruise_segment.cruise(
         altitude=35000, range=500, weight_fraction=0.6, Mach=0.78
     )
-    TWR_cruise = cruise.Thrust_weight_ratio(wing_loading, cruise1)
+    TWR_cruise = cruise1.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_cruise)
 
     ### Phase 8 ###
 
-    descent = Mission_segments.climb(
+    descent = climb_segment.climb(
         climb_rate=-1500,
         start_altitude=35000,
         end_altitude=3000,
@@ -105,7 +95,7 @@ def constraint_analysis_main(plot=False):
         KEAS=250,
         MACH=None,
     )
-    TWR_descent = climb.Thrust_to_weight_ratio_2(wing_loading, descent)
+    TWR_descent = descent.Thrust_to_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_descent)
 
     ### Phase 9 ###
@@ -113,47 +103,47 @@ def constraint_analysis_main(plot=False):
     thrust_to_weight_ratios.append(TWR_deceleration)
 
     ### Phase 10 ###
-    approach = Mission_segments.approach(
+    approach = approach_segment.approach(
         flight_path_angle=3,
         KEAS=250,
         start_altitude=3000,
         end_altitude=0,
         weight_fraction=0.85,
     )
-    TWR_approach = approach_landing.thrust_weight_ratio_approach(wing_loading, approach)
+    TWR_approach = approach.thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_approach)
 
     ### Phase 11 ###
-    Take_off = Mission_segments.Takeoff(5500, 0.6, 0)
-    TWR_go_around = takeoff.Thrust_weight_ratio(
-        wing_loading,
-        Take_off.weight_fraction.value,
-        2.56,
-        Take_off.takeoff_distance.value,
-        hobst=Take_off.obstacle_height.value,
+    Take_off_go_around = takeoff_segment.Takeoff(
+        takeoff_distance=5500,
+        weight_fraction=0.6,
+        obstacle_height=0,
+        mu=0.05,
+        Cd_r=0.07,
+        Cl_max=2.56,
+        kt0=1.2,
+        altitude_runway=0,
+        tr=3,
     )
+    TWR_go_around = Take_off_go_around.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_go_around)
 
     ### Phase 12 ###
-    cruise_reserve = Mission_segments.cruise(
+    cruise_reserve = cruise_segment.cruise(
         altitude=15000, range=200, weight_fraction=0.6, EAS=250
     )
-    TWR_cruise_reserve = cruise.Thrust_weight_ratio(wing_loading, cruise_reserve)
+    TWR_cruise_reserve = cruise_reserve.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_cruise_reserve)
 
     ### Phase 13 ###
     print("Loiter")
-    loiter = Mission_segments.cruise(
+    loiter = cruise_segment.cruise(
         altitude=15000,
         range=200,
         weight_fraction=0.6,
         EAS=250,
     )
-    TWR_loiter = cruise.Thrust_weight_ratio(
-        wing_loading,
-        loiter,
-        Equi_Speed=cruise.iter_best_L_D_speed(loiter.altitude.value, wing_loading),
-    )
+    TWR_loiter = loiter.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_loiter)
 
     ### Additional constraints ###
@@ -161,7 +151,7 @@ def constraint_analysis_main(plot=False):
 
     service_ceiling = 41000
     Mach = 0.78
-    ceiling = Mission_segments.climb(
+    ceiling = climb_segment.climb(
         climb_rate=100,
         start_altitude=service_ceiling,
         end_altitude=service_ceiling,
@@ -170,40 +160,44 @@ def constraint_analysis_main(plot=False):
         KEAS=None,
         MACH=Mach,
     )
-    TWR_service_ceiling = climb.Thrust_to_weight_ratio_2(wing_loading, ceiling)
+    TWR_service_ceiling = ceiling.Thrust_to_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_service_ceiling)
 
     ### Maximum Mach Number ###
     max_Mach = 0.82
-    maximum_mach_segment = Mission_segments.cruise(
+    maximum_mach_segment = cruise_segment.cruise(
         altitude=35000,
         range=500,
         weight_fraction=0.75,
         Mach=max_Mach,
     )
-    TWR_max_mach = cruise.Thrust_weight_ratio(wing_loading, maximum_mach_segment)
+    TWR_max_mach = maximum_mach_segment.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_max_mach)
 
     ### Steep Turn ###
-    turn_segment = Mission_segments.cruise(
+    turn_segment = cruise_segment.cruise(
         altitude=35000, range=500, weight_fraction=0.75, Mach=0.78, bank_angle=45
     )
-    TWR_steep_turn = cruise.Thrust_weight_ratio(wing_loading, turn_segment)
+    TWR_steep_turn = turn_segment.Thrust_weight_ratio(wing_loading)
     thrust_to_weight_ratios.append(TWR_steep_turn)
 
     ### Climb with one engine ###
+    takeoff_one_engine = takeoff_segment.Takeoff(5500, 1, kt0=1.3)
     print("Climb with one engine")
     gradient_percent = 0.05
     path_angle = np.arctan(gradient_percent) * 180 / np.pi
-    takeoff_speed = takeoff.takeoff_EAS_speed(
-        wing_loading, Clmax=2.56, kt0=1.3, beta=0.96
+    takeoff_speed = takeoff_one_engine.takeoff_EAS_speed(wing_loading)
+    climb_one_engine_segment = climb_segment.climb(
+        KEAS=takeoff_speed,
+        start_altitude=0,
+        end_altitude=5000,
+        time=100,
+        weight_fraction=1,
+        flight_path_angle=path_angle,
     )
     # takeoff_speed = 160
-    TWR_climb_one_engine = 2 * climb.Thrust_to_weight_ratio(
-        wing_loading,
-        beta=1,
-        flight_path_angle=path_angle,
-        speed_EAS=takeoff_speed,
+    TWR_climb_one_engine = 2 * climb_one_engine_segment.Thrust_to_weight_ratio(
+        wing_loading
     )
     thrust_to_weight_ratios.append(TWR_climb_one_engine)
     phase_names = [
@@ -225,10 +219,10 @@ def constraint_analysis_main(plot=False):
         "Climb with One Engine",
     ]
     ### Landing constraint ###
-    landing = Mission_segments.landing(
+    landing = landing_segment.landing(
         weight_fraction=0.85, KEAS=135, Cl_max=3, k_land=1.3
     )
-    wing_loading_landing = float(approach_landing.landing_constraint(landing))
+    wing_loading_landing = float(landing.landing_constraint())
 
     """Find the feasible design space and Design Point"""
     ## Find the feasibke design space

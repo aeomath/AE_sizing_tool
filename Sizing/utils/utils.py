@@ -1,6 +1,8 @@
 import ussa1976 as ussa
 import numpy as np
 from Sizing.utils.atmosphere import Atmosphere, SL_SOUND_SPEED
+from Sizing.aerodynamics.Assumptions import K1, K2
+import Sizing.aerodynamics.Assumptions as Sizing_aerodynamics_Assumptions
 
 SOUND_SPEED_AT_SEA_LEVEL = 340.29  # m/s
 
@@ -84,6 +86,21 @@ def Mach_to_TAS(Mach, altitude, meter=False):
     return TAS
 
 
+def TAS_to_Mach(TAS, altitude, meter=False):
+    """
+    This function calculates the Mach number of the aircraft based on the true airspeed.
+    Parameters:
+        TAS (float): True airspeed of the aircraft in knots.
+        altitude (float): Altitude of the aircraft in feet.
+        meter (bool): True if altitude is in meters, False if it is in feet.
+    Returns:
+        float: Mach number.
+    """
+    EAS = TAS_to_KEAS(TAS, altitude, meter)
+    Mach = KEAS_to_Mach(EAS, altitude, meter)
+    return Mach
+
+
 def ft_to_meter(ft):
     """
     This function converts feet to meters.
@@ -122,3 +139,51 @@ def fts_to_knots(fts):
     float: Speed in knots.
     """
     return fts / 1.68781
+
+
+def crossover_altitude(Mach_goal, Speed_EAS):
+    """
+    Calculate the crossover altitude where a given equivalent airspeed (EAS)
+    reaches a specified Mach number.
+    Args:
+        Mach_goal (float): The target Mach number to reach.
+        Speed_EAS (float): The equivalent airspeed (EAS) in knots.
+    Returns:
+        int: The altitude in feet at which the specified Mach number is reached.
+    """
+
+    alt = 20000  # Initial altitude in feet, since the goal mach will ve reached at a higher altitude, we can start from a high altitude
+    step = 100  # Step size in feet , accuarcy of the calculation
+    while True:
+        Mach = KEAS_to_Mach(Speed_EAS, alt)
+        if Mach >= Mach_goal:
+            break
+        alt += step
+    return alt
+
+
+### Best L/D speed
+def Best_L_D_speed(altitude, Wing_Loading, Cd0):  ### best lift to drag speed
+    K = K1
+    return np.sqrt(
+        (2 / (Atmosphere(altitude).density_slug_ft3.value))
+        * Wing_Loading
+        * np.sqrt(K / (Cd0()))
+    )
+
+
+def iter_best_L_D_speed(altitude, Wing_Loading):
+    # print("getting best L/D speed...")
+    ### best lift to drag speed
+    tolerance = 1e-3
+    max_iterations = 100
+    Mach = 0.5
+    for i in range(max_iterations):
+        Cd0 = Sizing_aerodynamics_Assumptions.Cd0(Mach, altitude)
+        speed_fts = Best_L_D_speed(altitude, Cd0, Wing_Loading)
+        speed = fts_to_knots(speed_fts)
+        new_Mach = KEAS_to_Mach(speed, altitude)
+        if np.all(abs(new_Mach - Mach) < tolerance):
+            break
+        Mach = new_Mach
+    return speed
