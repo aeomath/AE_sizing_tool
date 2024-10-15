@@ -26,16 +26,17 @@ To install the tool, follow these steps. Two options are available to install th
     cd AE_sizing_tool
     ```
 2. Create a virtual environment using conda or venv (using Python 3.10 if possible):
+   Using venv
     ```bash
     python -m venv venv
     ```
-    or
+    or using conda
     ```bash
     conda create --name venv python=3.10
     ```
-3. Install the required dependencies:
+4. Install the required dependencies **in your environment** :
     ```bash
-    pip install -r requirements.txt
+    (env)$ pip install -r requirements.txt
     ```
 
 ## Usage
@@ -103,8 +104,8 @@ After Running the tool , mains results will be printed in a console and three gr
 * The second graph shows the Weight_Breakdown.
 >**If the graphs are not displayed, please refresh the page (F5) where the graphs are displayed. (sometimes Plotly has issues with displaying the graphs)**
 
-### Output folder## 
-Also : All the results will be saved in the `outputs` folder in a HTML file you can open it in your browser .
+### Output folder ### 
+All the results will be saved in the `outputs` folder in  HTML files you can open it in your browser.
 ## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request.
