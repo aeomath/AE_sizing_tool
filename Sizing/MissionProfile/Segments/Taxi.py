@@ -2,12 +2,26 @@ from Sizing.Variable_info.Variable import Variable
 import Sizing.utils.utils as utils
 import Sizing.propulsion.assumptions as propulsion
 from Sizing.utils.atmosphere import Atmosphere
+from Sizing.MissionProfile.segments import segments
 
 
-class Taxi:
+class Taxi(segments):
     def __init__(
-        self, time, percent_fuel_flow, weight_fraction=1, taxi_speed=15, altitude=0
+        self,
+        time,
+        percent_fuel_flow,
+        weight_fraction=1,
+        speed=15,
+        altitude=0,
+        phase_number=-1,
+        name=None,
     ):
+        super().__init__(
+            "Taxi,",
+            phase_number=phase_number,
+            weight_fraction=weight_fraction,
+            name=name,
+        )
         self.time = Variable("time", time, "min", "Time of taxi")
         self.percent_fuel_flow = Variable(
             "percent_fuel_flow",
@@ -16,11 +30,8 @@ class Taxi:
             "Percent of takeoff fuel flow used during taxi",
         )
         self.speed = Variable(
-            "taxi_speed", taxi_speed, "knots", "Taxi speed"
+            "taxi_speed", speed, "knots", "Taxi speed"
         )  ## Assumed to be at sea level
-        self.weight_fraction = Variable(
-            "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
-        )
         self.altitude = Variable("altitude", altitude, "ft", "Altitude")
 
     def Mach(self):
@@ -36,7 +47,7 @@ class Taxi:
             self.Mach(), Atmosphere(self.altitude.value).density_ratio.value
         )
 
-    def wf_wi(self, TWR):
+    def wf_wi(self, WSR, TWR):
         return (
             1
             - self.tsfc()
@@ -47,3 +58,8 @@ class Taxi:
             * self.thrust_lapse()
             / self.weight_fraction.value
         )
+
+    def Thrust_Weight_Ratio(self, WSR):
+        return (
+            0 * WSR
+        )  ## Thrust is almost zero during taxi, no real need to calculate it

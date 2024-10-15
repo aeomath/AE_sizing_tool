@@ -16,3 +16,21 @@ class Variable:
 
     def __str__(self):
         return f"{self.name}: {self.value} {self.unit}"
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "value": self.value,
+            "unit": self.unit,
+            "description": self.description,
+        }
+
+    def __repr__(self):
+        unit = f" ({self.unit})" if self.unit else ""
+        desc = f" - {self.description}" if self.description else ""
+        return f"{self.name}: {self.value}{unit}{desc}"
+
+    def __eq__(self, value):
+        return (
+            self.value == value
+        )  ## This is the equality operator careful, units are not considered

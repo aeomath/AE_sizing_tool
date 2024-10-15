@@ -6,9 +6,10 @@ from Sizing.utils.atmosphere import Atmosphere
 import numpy as np
 import Sizing.utils.Constants as const
 import Sizing.utils.utils as utils
+from Sizing.MissionProfile.segments import segments
 
 
-class Takeoff:
+class Takeoff(segments):
     """
     Represents the takeoff segment of a mission profile.
     Attributes:
@@ -32,13 +33,17 @@ class Takeoff:
         kt0=1.2,
         altitude_runway=0,
         tr=3,
+        phase_number=-1,
+        name=None,
     ):
+        super().__init__(
+            "Takeoff",
+            phase_number=phase_number,
+            weight_fraction=weight_fraction,
+            name=name,
+        )
         self.takeoff_distance = Variable(
             "takeoff_distance", takeoff_distance, "ft", "Takeoff distance"
-        )
-
-        self.weight_fraction = Variable(
-            "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
         )
         self.obstacle_height = Variable(
             "obstacle_height", obstacle_height, "ft", "Height of obstacle"
@@ -115,7 +120,7 @@ class Takeoff:
 
     ## Constraint Analysis
     ### Slide 19
-    def Thrust_weight_ratio(
+    def Thrust_Weight_Ratio(
         self,
         Wing_loading,
     ):
@@ -134,7 +139,6 @@ class Takeoff:
         Returns:
         float: Thrust-to-weight ratio required for takeoff.
         """
-        print("Taking off...")
         altitude = self.altitude_runway.value
         kt0 = self.kt0.value
         beta = self.weight_fraction.value

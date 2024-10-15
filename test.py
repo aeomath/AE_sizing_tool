@@ -6,19 +6,13 @@ from Sizing.utils.utils import KEAS_to_Mach
 import numpy as np
 import matplotlib.pyplot as plt
 import Sizing.utils.utils as utils
-from Sizing.constraint_analysis import constraint
-from Sizing.Mission_analysis import Main_mission_analysis
+from Sizing.constraint_analysis import Constraints_Parametric
+from Sizing.Mission_analysis import Main_Mission_Parametric
+from Sizing.MissionProfile.segments import segments
 
 
-def kg_m2_to_lb_ft2(kg_m2):
-    lb_ft2 = kg_m2 * 0.204816
-    return lb_ft2
-
-
-def lb_ft2_to_kg_m2(lb_ft2):
-    kg_m2 = lb_ft2 * 4.88243
-    return kg_m2
-
-
-##constraint.constraint_analysis_main(plot=True)
-Main_mission_analysis.Mission_analysis(125, 0.3)
+print(Aircraft.Aerodynamics.K1)
+print(Aircraft.Propulsion.ktsfc)
+print(Aircraft.Aerodynamics.K2)
+print(Aircraft.Structure.KWE)
+print(len(Aircraft.Design.Weight_fractions.value))

@@ -31,6 +31,17 @@ def mps_to_knots(mps):
     return mps * 3600 / 1852
 
 
+def nmi_to_ft(nmi):
+    """
+    Convert nautical miles to feet.
+    Parameters:
+    nmi (float): Nautical miles.
+    Returns:
+    float: Feet.
+    """
+    return nmi * 6076.1155
+
+
 def KEAS_to_Mach(KEAS, altitude, meter=False):
     """
     This function calculates the Mach number of the aircraft based on the equivalent airspeed.
@@ -141,7 +152,7 @@ def fts_to_knots(fts):
     return fts / 1.68781
 
 
-def crossover_altitude(Mach_goal, Speed_EAS):
+def crossover_altitude(Mach_goal, Speed_EAS, accuracy=100):
     """
     Calculate the crossover altitude where a given equivalent airspeed (EAS)
     reaches a specified Mach number.
@@ -153,37 +164,10 @@ def crossover_altitude(Mach_goal, Speed_EAS):
     """
 
     alt = 20000  # Initial altitude in feet, since the goal mach will ve reached at a higher altitude, we can start from a high altitude
-    step = 100  # Step size in feet , accuarcy of the calculation
+    step = accuracy  # Step size in feet , accuarcy of the calculation
     while True:
         Mach = KEAS_to_Mach(Speed_EAS, alt)
         if Mach >= Mach_goal:
             break
         alt += step
     return alt
-
-
-### Best L/D speed
-def Best_L_D_speed(altitude, Wing_Loading, Cd0):  ### best lift to drag speed
-    K = K1
-    return np.sqrt(
-        (2 / (Atmosphere(altitude).density_slug_ft3.value))
-        * Wing_Loading
-        * np.sqrt(K / (Cd0()))
-    )
-
-
-def iter_best_L_D_speed(altitude, Wing_Loading):
-    # print("getting best L/D speed...")
-    ### best lift to drag speed
-    tolerance = 1e-3
-    max_iterations = 100
-    Mach = 0.5
-    for i in range(max_iterations):
-        Cd0 = Sizing_aerodynamics_Assumptions.Cd0(Mach, altitude)
-        speed_fts = Best_L_D_speed(altitude, Cd0, Wing_Loading)
-        speed = fts_to_knots(speed_fts)
-        new_Mach = KEAS_to_Mach(speed, altitude)
-        if np.all(abs(new_Mach - Mach) < tolerance):
-            break
-        Mach = new_Mach
-    return speed

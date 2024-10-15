@@ -1,9 +1,9 @@
 import numpy as np
 from Sizing.Variable_info.variables import Aircraft
 
-### Constants
-K1 = 0.0556
-K2 = -0.0197
+
+K1 = Aircraft.Aerodynamics.K1.value
+K2 = Aircraft.Aerodynamics.K2.value
 
 
 def Cd0(Mach_inf, altitude):
@@ -25,4 +25,4 @@ def Cdi(Cl):
     Returns:
         float: Drag coefficient.
     """
-    return Aircraft.Aerodynamics.K1.value * Cl**2 + Aircraft.Aerodynamics.K2.value * Cl
+    return K1 * Cl**2 + K2 * Cl

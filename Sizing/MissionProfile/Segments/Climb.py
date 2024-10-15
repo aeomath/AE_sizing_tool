@@ -5,9 +5,10 @@ import Sizing.propulsion.assumptions as propulsion
 from Sizing.utils.atmosphere import Atmosphere
 import numpy as np
 import Sizing.utils.Constants as const
+from Sizing.MissionProfile.segments import segments
 
 
-class climb:
+class climb(segments):
     """
     This class contains the variables for the climb and descent segments of the mission profile.
     If climb, climb_rate is positive, else if descent, climb_rate is negative.
@@ -32,19 +33,53 @@ class climb:
         MACH=None,
         climb_rate=None,
         flight_path_angle=None,
+        phase_number=-1,
+        name=None,
+        is_additional_constraint=False,
     ):
         ### Check that either Mach or EAS is provided
         if KEAS is None and MACH is None:
             raise ValueError("Either Mach or EAS must be provided")
         if KEAS is not None and MACH is not None:
             raise ValueError("Either Mach or EAS must be provided")
-        self.KEAS = Variable("KEAS", KEAS, "KEAS", "Equivalent airspeed")
-        self.MACH = Variable("MACH", MACH, "", "Mach number")
         ## Check that either flight path angle or ROC is provided
         if climb_rate is None and flight_path_angle is None:
             raise ValueError("Either climb rate or flight path angle must be provided")
         if climb_rate is not None and flight_path_angle is not None:
             raise ValueError("Either climb rate or flight path angle must be provided")
+        if climb_rate is not None:
+            if climb_rate < 0:
+                super().__init__(
+                    "Descent",
+                    phase_number=phase_number,
+                    weight_fraction=weight_fraction,
+                    name=name,
+                )
+            else:
+                super().__init__(
+                    "Climb",
+                    phase_number=phase_number,
+                    weight_fraction=weight_fraction,
+                    name=name,
+                )
+        elif flight_path_angle is not None:
+            if flight_path_angle < 0:
+                super().__init__(
+                    "Descent",
+                    phase_number=phase_number,
+                    weight_fraction=weight_fraction,
+                    name=name,
+                )
+            else:
+                super().__init__(
+                    "Climb",
+                    phase_number=phase_number,
+                    weight_fraction=weight_fraction,
+                    name=name,
+                )
+
+        self.KEAS = Variable("KEAS", KEAS, "KEAS", "Equivalent airspeed")
+        self.MACH = Variable("MACH", MACH, "", "Mach number")
         self.climb_rate = Variable("climb_rate", climb_rate, "m/s", "Rate of climb")
         self.flight_path_angle = Variable(
             "flight_path_angle", flight_path_angle, "deg", "Flight path angle"
@@ -54,18 +89,7 @@ class climb:
         )
         self.end_altitude = Variable("end_altitude", end_altitude, "ft", "End altitude")
         self.time = Variable("time", time, "s", "Time of climb")
-        self.weight_fraction = Variable(
-            "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
-        )
-
-    def is_descent(self):
-        """
-        Determine if the segment is a descent phase.
-        Returns:
-            bool: True if the climb rate is negative, indicating a descent; False otherwise.
-        """
-
-        return self.climb_rate < 0
+        self.is_additional_constraint = is_additional_constraint
 
     def Cl(self, wing_loading):
         """
@@ -198,7 +222,7 @@ class climb:
         return np.sqrt(temp_ratio) / (1 - self.u(wing_loading, TWR))
 
     ### Constraint_analysis
-    def Thrust_to_weight_ratio(self, wing_loading):
+    def Thrust_Weight_Ratio(self, wing_loading):
         """
         Calculate the thrust-to-weight ratio for climb.
         2 cases are considered:
@@ -270,16 +294,12 @@ class climb:
             ## if flight path angle is given, use it to calculate the climb term
             elif self.flight_path_angle.value is not None:
                 climb_term = np.sin(self.flight_path_angle.value * np.pi / 180)
-
-        if np.all(climb_term) > 0:
-            print("Climbing")
-        else:
-            print("Descending")
         linear_term = K1 * (beta / q) * wing_loading
         Inverse_ter = Cd0 / ((beta / q) * wing_loading)
         T_W = (beta / alpha) * (linear_term + K2 + Inverse_ter + climb_term)
         return T_W
 
+    ## Override
     def wf_wi(self, WSR, TWR):
         """
         Calculate the weight fraction during the climb phase of a mission.
@@ -291,7 +311,8 @@ class climb:
         float: The weight fraction after the climb phase. Wendclimb/Wstart
         The function takes into account the climb segment of the mission.
         """
-
+        if self.is_additional_constraint:
+            return 1
         if self.KEAS.value is not None:
             TAS_start = utils.KEAS_to_TAS(self.KEAS.value, self.start_altitude.value)
             TAS_end = utils.KEAS_to_TAS(self.KEAS.value, self.end_altitude.value)
@@ -309,4 +330,7 @@ class climb:
         ) ** 2 / (2 * const.SL_GRAVITY_FT)
         tsfc = self.tsfc()
         delta = alt_accel_end - alt_accel_start
+        if self.type != "Climb":
+            print("Descending : no fuel burned for phase", self.phase_number)
+            return 1
         return np.exp(-tsfc / utils.knots_to_fts(TAS_knots) * delta / (1 - u))

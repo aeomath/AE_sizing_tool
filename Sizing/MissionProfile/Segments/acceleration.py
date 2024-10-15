@@ -5,10 +5,26 @@ import Sizing.propulsion.assumptions as propulsion
 from Sizing.utils.atmosphere import Atmosphere
 import numpy as np
 import Sizing.utils.Constants as const
+from Sizing.MissionProfile.segments import segments
 
 
-class acceleration:
-    def __init__(self, KEAS_start, KEAS_end, time, weight_fraction, altitude):
+class acceleration(segments):
+    def __init__(
+        self,
+        KEAS_start,
+        KEAS_end,
+        time,
+        weight_fraction,
+        altitude,
+        phase_number=-1,
+        name=None,
+    ):
+        super().__init__(
+            "Acceleration",
+            phase_number=phase_number,
+            weight_fraction=weight_fraction,
+            name=name,
+        )
         self.KEAS_start = Variable(
             "KEAS_start", KEAS_start, "KEAS", "Start Equivalent airspeed"
         )
@@ -16,13 +32,10 @@ class acceleration:
             "KEAS_end", KEAS_end, "KEAS", "End Equivalent airspeed"
         )
         self.time = Variable("time", time, "s", "Time of acceleration")
-        self.weight_fraction = Variable(
-            "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
-        )
         self.altitude = Variable("altitude", altitude, "ft", "Altitude")
 
     def is_deceleration(self):
-        return self.KEAS_start > self.KEAS_end
+        return self.KEAS_start.value > self.KEAS_end.value
 
     @property
     def Mach_start(self):
@@ -103,18 +116,16 @@ class acceleration:
         )
 
     def Thrust_Weight_Ratio(self, wing_loading):
-        print("Acceleration")
+        if self.is_deceleration():
+            print("Deceleration : no Thrust required for phase", self.phase_number)
+            return 0 * wing_loading
 
         beta = self.weight_fraction.value
         altitude = self.altitude.value
         EAS_Start = self.KEAS_start.value
         EAS_End = self.KEAS_end.value
-        time = self.time.value
         K1 = aerodynamics.K1
         K2 = aerodynamics.K2
-        atm = Atmosphere(altitude)
-        Mach_start = self.Mach_start.value
-        Mach_end = self.Mach_end.value
         q_start = (
             0.5
             * Atmosphere(0).density_slug_ft3.value
@@ -137,6 +148,9 @@ class acceleration:
 
     ##Mission analysis###
     def wf_wi(self, WSR, TWR):
+        if self.is_deceleration():
+            print("Deceleration : no fuel burned for phase", self.phase_number)
+            return 1
         V_start = utils.knots_to_fts(
             utils.KEAS_to_TAS(self.KEAS_start.value, self.altitude.value)
         )

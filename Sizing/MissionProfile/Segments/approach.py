@@ -5,9 +5,10 @@ import Sizing.propulsion.assumptions as propulsion
 from Sizing.utils.atmosphere import Atmosphere
 import numpy as np
 import Sizing.utils.Constants as const
+from Sizing.MissionProfile.segments import segments
 
 
-class approach:
+class approach(segments):
     def __init__(
         self,
         flight_path_angle,
@@ -15,7 +16,17 @@ class approach:
         end_altitude,
         weight_fraction,
         KEAS,
+        percent_fuel_flow=0.20,
+        phase_number=-1,
+        name=None,
+        weight_fraction_constraint=0.85,
     ):
+        super().__init__(
+            "Approach",
+            phase_number=phase_number,
+            weight_fraction=weight_fraction,
+            name=name,
+        )
         self.flight_path_angle = Variable(
             "flight_angle", flight_path_angle, "deg", "Flight angle"
         )
@@ -23,10 +34,16 @@ class approach:
             "start_altitude", start_altitude, "ft", "Start altitude"
         )
         self.end_altitude = Variable("end_altitude", end_altitude, "ft", "End altitude")
-        self.weight_fraction = Variable(
-            "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
-        )
         self.KEAS = Variable("KEAS", KEAS, "KEAS", "Equivalent airspeed")
+        self.percent_fuel_flow = Variable(
+            "percent_fuel_flow", percent_fuel_flow, "", "Percent fuel flow"
+        )
+        self.weight_fraction_constraint = Variable(
+            "weight_fraction_constraint",
+            weight_fraction_constraint,
+            "",
+            "Weight fraction constraint applied for the approach",
+        )
 
     def Cd0(self):
         Cd0_start = aerodynamics.Cd0(
@@ -50,16 +67,11 @@ class approach:
         )
         return (alpha_start + alpha_end) / 2
 
-    def thrust_weight_ratio(self, wing_loading):
-        print("Approach segment")
-        beta = self.weight_fraction.value
+    def Thrust_Weight_Ratio(self, wing_loading):
+        beta = self.weight_fraction_constraint.value  ## Constraint on weight fraction
         speed_EAS = self.KEAS.value
-        start_alt = self.start_altitude.value
-        end_alt = self.end_altitude.value
         flight_path_angle = self.flight_path_angle.value
 
-        sigma_start = Atmosphere(start_alt).density_ratio.value
-        sigma_end = Atmosphere(end_alt).density_ratio.value
         K1 = aerodynamics.K1
         K2 = aerodynamics.K2
 
@@ -78,6 +90,67 @@ class approach:
             + Inverse_ter
             - np.sin(
                 flight_path_angle * np.pi / 180
-            )  ## negative sign because the flight path angle is negative (descending)
+            )  ## negative sign because the flight path angle is negative (descending), input is positive
         )
         return T_W
+
+    def Cl(self, wing_loading):
+        q = (
+            0.5
+            * Atmosphere(0).density_slug_ft3.value
+            * utils.knots_to_fts(self.KEAS.value) ** 2
+        )
+        return (
+            wing_loading
+            * self.weight_fraction.value
+            # * np.cos(-self.flight_path_angle.value * np.pi / 180)
+        ) / q
+
+    def Cd(self, wing_loading):
+        return (
+            self.Cd0()
+            + aerodynamics.K1 * self.Cl(wing_loading) ** 2
+            + aerodynamics.K2 * self.Cl(wing_loading)
+        )
+
+    def u(self, wing_loading, TWR):
+        return (self.Cd(wing_loading) * self.weight_fraction.value) / (
+            self.alpha() * self.percent_fuel_flow.value * self.Cl(wing_loading) * TWR
+        )
+
+    def tsfc(self):
+        tsfc_start = propulsion.TSFC(
+            utils.KEAS_to_Mach(self.KEAS.value, self.start_altitude.value),
+            Atmosphere(self.start_altitude.value).temperature_ratio.value,
+        )
+        tsfc_end = propulsion.TSFC(
+            utils.KEAS_to_Mach(self.KEAS.value, self.end_altitude.value),
+            Atmosphere(self.end_altitude.value).temperature_ratio.value,
+        )
+        return (tsfc_start + tsfc_end) / 2
+
+    def wf_wi(self, WSR, TWR):
+        """
+        Calculate the weight fraction during the approach phase of a mission.
+        Parameters:
+        WSR (float): Wing loading ratio.
+        TWR (float): Thrust-to-weight ratio.
+        Mission (Mission_segments.climb): An instance of the approach segment containing mission-specific parameters.
+        Returns:
+        float: The weight fraction after the climb phase. Wendclimb/Wstart
+        The function takes into account the climb segment of the mission.
+        """
+        TAS_start = utils.KEAS_to_TAS(self.KEAS.value, self.start_altitude.value)
+        TAS_end = utils.KEAS_to_TAS(self.KEAS.value, self.end_altitude.value)
+        TAS_knots = (TAS_start + TAS_end) / 2  # Average TAS in knots
+        u = self.u(WSR, TWR)
+        alt_accel_end = self.end_altitude.value + utils.knots_to_fts(TAS_end) ** 2 / (
+            2 * const.SL_GRAVITY_FT
+        )
+        alt_accel_start = self.start_altitude.value + utils.knots_to_fts(
+            TAS_start
+        ) ** 2 / (2 * const.SL_GRAVITY_FT)
+        tsfc = self.tsfc()
+        delta = alt_accel_end - alt_accel_start
+        # return np.exp(-tsfc / utils.knots_to_fts(TAS_knots) * delta / (1 - u))
+        return 1  ## For now, return 1, ##FIXME : Implement the correct formula, the above formula is not correct
