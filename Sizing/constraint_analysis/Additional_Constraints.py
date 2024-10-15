@@ -6,10 +6,17 @@ import Sizing.MissionProfile.Segments.Climb as climb_segment
 import Sizing.MissionProfile.Segments.Takeoff as takeoff_segment
 import Sizing.MissionProfile.Segments.approach as approach_segment
 import Sizing.MissionProfile.Segments.landing as landing_segment
+from typing import List
+from Sizing.MissionProfile.segments import segments
 import numpy as np
 
 
-def Additional_constraints(name_list, Thruts_Weight_ratios_list: list, Wing_loading):
+def Additional_constraints(
+    name_list,
+    Thruts_Weight_ratios_list: list,
+    Wing_loading,
+    Weight_fraction_top_of_climb=0.95,
+):
     ### Service Ceiling ###
 
     service_ceiling = 41000
@@ -19,7 +26,7 @@ def Additional_constraints(name_list, Thruts_Weight_ratios_list: list, Wing_load
         start_altitude=service_ceiling,
         end_altitude=service_ceiling,
         time=100,
-        weight_fraction=0.75,
+        weight_fraction=Weight_fraction_top_of_climb,
         KEAS=None,
         MACH=Mach,
         name="Service Ceiling",
@@ -32,7 +39,7 @@ def Additional_constraints(name_list, Thruts_Weight_ratios_list: list, Wing_load
     maximum_mach_segment = cruise_segment.cruise(
         altitude=35000,
         range=500,
-        weight_fraction=0.89,
+        weight_fraction=Weight_fraction_top_of_climb,
         Mach=max_Mach,
         name="Maximum Mach Number",
     )
@@ -45,7 +52,7 @@ def Additional_constraints(name_list, Thruts_Weight_ratios_list: list, Wing_load
     turn_segment = cruise_segment.cruise(
         altitude=39000,
         range=500,
-        weight_fraction=0.9,
+        weight_fraction=Weight_fraction_top_of_climb,
         Mach=0.78,
         bank_angle=45,
         name="Steep Turn",
@@ -58,7 +65,7 @@ def Additional_constraints(name_list, Thruts_Weight_ratios_list: list, Wing_load
 
     gradient_percent = 0.05
     path_angle = np.arctan(gradient_percent) * 180 / np.pi
-    takeoff_speed = takeoff_one_engine.takeoff_EAS_speed(Wing_loading)
+    # takeoff_speed = takeoff_one_engine.takeoff_EAS_speed(Wing_loading)
     climb_one_engine_segment = climb_segment.climb(
         KEAS=150,
         start_altitude=0,

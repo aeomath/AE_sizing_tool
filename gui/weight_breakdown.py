@@ -3,9 +3,8 @@ import Sizing.MissionProfile.segments as sg
 import plotly.graph_objects as go
 from typing import List
 from Sizing.Variable_info.variables import Aircraft
-from Sizing.Variable_info.Variable import Variable
-import tkinter as tk
-from tkinter import ttk
+
+import os
 
 
 def weight_breakdown():
@@ -13,18 +12,20 @@ def weight_breakdown():
     Wpayload = Aircraft.Payload.Wpayload.value
     Wempty = Aircraft.Structure.Empty_Weight.value
     Wfuel = Aircraft.Design.Fuel_Weight.value
+    WTO = Aircraft.Design.TOW.value
     weight_dict = {
-        "Payload": Wpayload,
-        "Wcrew": Wcrew,
+        "TOW": WTO,
         "Empty": Wempty,
         "Fuel Weight": Wfuel,
+        "Payload": Wpayload,
+        "Wcrew": Wcrew,
     }
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
             x=list(weight_dict.keys()),
             y=list(weight_dict.values()),
-            marker=dict(color=["blue", "green", "red", "yellow"]),
+            marker=dict(color=["blue", "green", "red", "purple", "orange"]),
         )
     )
     fig.update_layout(
@@ -34,6 +35,9 @@ def weight_breakdown():
         xaxis=dict(tickmode="array", tickvals=list(weight_dict.keys())),
         yaxis=dict(tickformat=","),
     )
+    if not os.path.exists("images"):
+        os.mkdir("images")
+    fig.write_html("outputs/weight_breakdown.html")
     fig.show()
     return fig
 
@@ -61,6 +65,9 @@ def histo_weights(segment_list: List[sg.segments]):
         yaxis=dict(tickformat=","),
     )
     fig.show()
+    if not os.path.exists("images"):
+        os.mkdir("images")
+    fig.write_html("outputs/weight_per_phase.html")
     return fig
 
 
@@ -71,3 +78,56 @@ def print_Final_Design():
     print(Aircraft.Design.TOW)
     print(Aircraft.Design.WING_LOADING)
     print(Aircraft.Design.THRUST_TO_WEIGHT)
+    print(Aircraft.Design.Wing_Area)
+    print(Aircraft.Design.Sea_level_Thrust)
+    print(Aircraft.Design.Fuel_Weight)
+    print("############################################")
+
+    def generate_table():
+        with open("outputs/final_design_results.html", "w") as file:
+            html_table = f"""
+            <h2>Main Results</h2>
+            <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Unit</th>
+            </tr>
+            <tr>
+                <td>TOW</td>
+                <td>{Aircraft.Design.TOW.value}</td>
+                <td>{Aircraft.Design.TOW.unit}</td>
+            </tr>
+            <tr>
+                <td>Wing Loading</td>
+                <td>{Aircraft.Design.WING_LOADING.value}</td>
+                <td>{Aircraft.Design.WING_LOADING.unit}</td>
+            </tr>
+            <tr>
+                <td>Thrust to Weight</td>
+                <td>{Aircraft.Design.THRUST_TO_WEIGHT.value}</td>
+                <td>{Aircraft.Design.THRUST_TO_WEIGHT.unit}</td>
+            </tr>
+            <tr>
+                <td>Wing Area</td>
+                <td>{Aircraft.Design.Wing_Area.value}</td>
+                <td>{Aircraft.Design.Wing_Area.unit}</td>
+            </tr>
+            <tr>
+                <td>Sea Level Thrust</td>
+                <td>{Aircraft.Design.Sea_level_Thrust.value}</td>
+                <td>{Aircraft.Design.Sea_level_Thrust.unit}</td>
+            </tr>
+            <tr>
+                <td>Fuel Weight</td>
+                <td>{Aircraft.Design.Fuel_Weight.value}</td>
+                <td>{Aircraft.Design.Fuel_Weight.unit}</td>
+            </tr>
+            </table>
+            """
+            file.write(html_table)
+            print(
+                "HTML file 'outputs/final_design_results.html' generated successfully."
+            )
+
+    generate_table()

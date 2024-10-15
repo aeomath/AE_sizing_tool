@@ -3,6 +3,8 @@ import Sizing.MissionProfile.Segments.approach as approach_segment
 import Sizing.MissionProfile.Segments.landing as landing_segment
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+
 
 import Sizing.utils.utils as utils
 import Sizing.constraint_analysis.Additional_Constraints as Additional_Constraints
@@ -18,7 +20,7 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
     wing_loading = np.linspace(wing_min, wing_max, num_points)
     Thrusts_Weight_ratios = []
     names = []
-    print("len(segment_list)", len(segment_list))
+    # print("len(segment_list)", len(segment_list))
     for i in range(len(segment_list)):
         names.append(segment_list[i].name)
         # print(
@@ -30,15 +32,21 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
         Thrusts_Weight_ratios.append(segment_list[i].Thrust_Weight_Ratio(wing_loading))
         if segment_list[i].type == "Landing":
             landing_segment = segment_list[i]  ## Save the landing segment for later
+        ## Test if the sement is top of climb
+        if segment_list[i].phase_number == 6:
+            weight_fraction_top_of_climb = segment_list[i].weight_fraction.value
+
+    """ADDITIONAL CONSTRAINTS SPECIFIC TO THE PROJECT"""
+    ### Additional constraints ###
 
     Additional_Constraints.Additional_constraints(
-        names, Thrusts_Weight_ratios, wing_loading
-    )  ## Add additional constraints
-    wing_loading_landing = float(landing_segment.landing_constraint())
+        names, Thrusts_Weight_ratios, wing_loading, weight_fraction_top_of_climb
+    )
+    """END OF ADDITIONAL CONSTRAINTS"""
 
-    """
-    ADDITIONAL CONSTRAINTS SPECIFIC TO THE PROJECT"""
-    ### Additional constraints ###
+    """Find the landing constraint"""
+    wing_loading_landing = float(landing_segment.landing_constraint())
+    """END OF LANDING CONSTRAINT"""
 
     """Find the feasible design space and Design Point"""
     y_max = np.max(Thrusts_Weight_ratios, axis=0)
@@ -115,5 +123,10 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
         legend_title="Mission Segments",
     )
     if plot:
+        if not os.path.exists("outputs"):
+            os.mkdir("outputs")
+        fig.write_html("outputs/TWR_vs_Wing_Loading.html")
+        # fig.write_image("outputs/TWR_vs_Wing_Loading.png")
         fig.show()
+
     return wing_loading_design, TWR_design

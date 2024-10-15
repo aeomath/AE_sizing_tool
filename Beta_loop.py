@@ -3,7 +3,6 @@ from Sizing.Variable_info.variables import Aircraft
 from Sizing.Mission_analysis import Main_Mission_Parametric
 from Sizing.constraint_analysis import Constraints_Parametric
 from Sizing.MissionProfile.segments import segments
-from gui import weight_breakdown
 
 
 def Iter_Beta(
@@ -14,13 +13,14 @@ def Iter_Beta(
     prev_betas_list = [1] * len(segments_list)
     ## Results from the previous run, to be used as initial guess
     for i in range(max_iteration):
+        print(f"Starting iteration {i} for Beta loop")
         betas_list = Main_Mission_Parametric.Compute_Mission_Profile_Parametric(
             WSR, TWR, segments_list=segments_list
         )
-        print(betas_list, prev_betas_list)
+        # print(betas_list, prev_betas_list)
         betas_diff = np.abs(np.array(betas_list) - np.array(prev_betas_list))
         if np.all(betas_diff < tolerance):
-            print(f"Convergence reached at iteration {i}")
+            print(f"Convergence Betas reached at iteration {i}")
             break
 
         prev_betas_list = betas_list
@@ -65,10 +65,11 @@ def main_loop(
     def WTO_computed(beta, WC, WP, WTO):
         return (WC + WP) / (beta - gamma(WTO))
 
-    for i in range(100):
+    for i in range(max_iteration):
         WTO = WTO_computed(Beta_final, WC, WP, guess_WTO)
-        # print(WTO)
+        print(f"Iteration {i} WTO")
         if np.abs(WTO - guess_WTO) < 1:
+            print(f"Convergence WTO reached at iteration {i}")
             break
         guess_WTO = WTO
     return (WTO, WSR, TWR, Beta_final, list_betas)

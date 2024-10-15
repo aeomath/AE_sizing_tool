@@ -7,6 +7,7 @@ import Sizing.MissionProfile.Segments.approach as approach_segment
 import Sizing.MissionProfile.Segments.landing as landing_segment
 import Sizing.MissionProfile.Segments.Taxi as taxi_segment
 from typing import List
+from tqdm import tqdm
 
 
 def Compute_Beta_Climb(WSR, TWR, climb_leg: climb_segment.climb, step=500):
@@ -27,7 +28,11 @@ def Compute_Beta_Climb(WSR, TWR, climb_leg: climb_segment.climb, step=500):
     start_altitude = climb_leg.start_altitude.value
     end_altitude = climb_leg.end_altitude.value
     beta_climb = climb_leg.weight_fraction.value
-    for i in range(start_altitude, end_altitude, step):
+    for i in tqdm(
+        range(start_altitude, end_altitude, step),
+        desc="Climbing_decomposition phase number " + str(climb_leg.phase_number),
+        leave=False,
+    ):
         climb = climb_segment.climb(
             climb_rate=climb_leg.climb_rate.value,
             KEAS=climb_leg.KEAS.value,
@@ -62,7 +67,11 @@ def Compute_Beta_Acceleration(
     start_speed = accel_leg.KEAS_start.value
     end_speed = accel_leg.KEAS_end.value
     beta_accel = accel_leg.weight_fraction.value
-    for speed in range(start_speed, end_speed, step):
+    for speed in tqdm(
+        range(start_speed, end_speed, step),
+        desc="Acceleration decomposition, phase number:" + str(accel_leg.phase_number),
+        leave=False,
+    ):
         acceleration = acceleration_segment.acceleration(
             KEAS_start=speed,
             KEAS_end=speed + step,
@@ -92,7 +101,11 @@ def Compute_Beta_Cruise(WSR, cruise_leg: cruise_segment.cruise, steps=10):
     """
     ranges_nmi = cruise_leg.range.value / steps
     beta_cruise = cruise_leg.weight_fraction.value
-    for i in range(steps):
+    for i in tqdm(
+        range(steps),
+        desc="Cruise decomposition :  phase number" + str(cruise_leg.phase_number),
+        leave=False,
+    ):
         cruise = cruise_segment.cruise(
             altitude=cruise_leg.altitude.value,
             range=ranges_nmi,
@@ -121,7 +134,11 @@ def Compute_Beta_Approach(WSR, TWR, approach_leg: approach_segment.approach, ste
     start_altitude = approach_leg.start_altitude.value
     end_altitude = approach_leg.end_altitude.value
     beta_approach = approach_leg.weight_fraction.value
-    for i in range(start_altitude, end_altitude, -steps):
+    for i in tqdm(
+        range(start_altitude, end_altitude, -steps),
+        desc="Approach decomposition. Phase number :" + str(approach_leg.phase_number),
+        leave=False,
+    ):
         approach_seg = approach_segment.approach(
             flight_path_angle=approach_leg.flight_path_angle.value,
             start_altitude=i,
@@ -158,7 +175,7 @@ def Compute_Mission_Profile_Parametric(
     """
     Beta = 1  ## Initial weight fraction
     Betas_list = []
-    for i in range(len(segments_list)):
+    for i in tqdm(range(len(segments_list))):
         segments_list[i].weight_fraction.value = Beta
         match segments_list[i].type:
             case "Climb":

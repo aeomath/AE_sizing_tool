@@ -243,8 +243,6 @@ class climb(segments):
         end_alt = self.end_altitude.value
         beta = self.weight_fraction.value
         ROC = self.climb_rate.value
-        if ROC is not None:
-            ROC = ROC / 60  # Convert ROC from ft/min to ft/s
         K1 = aerodynamics.K1
         K2 = aerodynamics.K2
         Cd0 = self.Cd0()
@@ -269,7 +267,7 @@ class climb(segments):
                 V_start = utils.Mach_to_TAS(self.MACH.value, start_alt)
                 V_end = utils.Mach_to_TAS(self.MACH.value, end_alt)
                 V = (V_start + V_end) / 2
-                climb_term = ROC / V
+                climb_term = (ROC / 60) / V
             ## if flight path angle is given, use it to calculate the climb term
             elif self.flight_path_angle is not None:
                 climb_term = np.sin(self.flight_path_angle * np.pi / 180)
@@ -290,7 +288,7 @@ class climb(segments):
                 V_end = utils.KEAS_to_TAS(self.KEAS.value, end_alt)
 
                 V = utils.knots_to_fts((V_start + V_end) / 2)
-                climb_term = ROC / V
+                climb_term = (ROC / 60) / V  ### ROC is in ft/min so convert to ft/s
             ## if flight path angle is given, use it to calculate the climb term
             elif self.flight_path_angle.value is not None:
                 climb_term = np.sin(self.flight_path_angle.value * np.pi / 180)
@@ -331,6 +329,6 @@ class climb(segments):
         tsfc = self.tsfc()
         delta = alt_accel_end - alt_accel_start
         if self.type != "Climb":
-            print("Descending : no fuel burned for phase", self.phase_number)
+            # print("Descending : no fuel burned for phase", self.phase_number)
             return 1
         return np.exp(-tsfc / utils.knots_to_fts(TAS_knots) * delta / (1 - u))

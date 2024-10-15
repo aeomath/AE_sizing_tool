@@ -41,9 +41,9 @@ class landing(segments):
         return self.Cl_max.value * q / (Beta * self.k_land.value**2)
 
     def wf_wi(self, WSR, TWR):
-        print("Landing segment : no fuel burned for phase", self.phase_number)
+        # print("Landing segment : no fuel burned for phase", self.phase_number)
         return 1
 
     def Thrust_Weight_Ratio(self, WSR):
-        print("Landing segment : no Thrust required for phase", self.phase_number)
+        # print("Landing segment : no Thrust required for phase", self.phase_number)
         return 0 * WSR

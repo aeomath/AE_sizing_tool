@@ -50,6 +50,7 @@ To run the tool with the provided example inputs, simply run the main script:
 ```bash
 python Main.py
 ```
+> Run time can take up to 2 minutes depending on the computer's performance. Please be patient. A prohgress bar will be displayed in the console to show the progress of the calculations. usually, the numbers of iterations are 3.
 
 ### Input your own parameters
 
@@ -95,7 +96,15 @@ To run the tool with your own input files, be careful to modify the name of the 
 ```bash
 python Main.py
 ```
+## Output
 
+After Running the tool , mains results will be printed in a console and three graphs will be generated 
+* The first graph shows the constraints analysis plot.
+* The second graph shows the Weight_Breakdown.
+>**If the graphs are not displayed, please refresh the page (F5) where the graphs are displayed. (sometimes Plotly has issues with displaying the graphs)**
+
+### Output folder## 
+Also : All the results will be saved in the `outputs` folder in a HTML file you can open it in your browser .
 ## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request.

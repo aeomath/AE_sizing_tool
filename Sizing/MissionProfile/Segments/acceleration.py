@@ -117,7 +117,7 @@ class acceleration(segments):
 
     def Thrust_Weight_Ratio(self, wing_loading):
         if self.is_deceleration():
-            print("Deceleration : no Thrust required for phase", self.phase_number)
+            # print("Deceleration : no Thrust required for phase", self.phase_number)
             return 0 * wing_loading
 
         beta = self.weight_fraction.value
@@ -149,7 +149,7 @@ class acceleration(segments):
     ##Mission analysis###
     def wf_wi(self, WSR, TWR):
         if self.is_deceleration():
-            print("Deceleration : no fuel burned for phase", self.phase_number)
+            # print("Deceleration : no fuel burned for phase", self.phase_number)
             return 1
         V_start = utils.knots_to_fts(
             utils.KEAS_to_TAS(self.KEAS_start.value, self.altitude.value)
