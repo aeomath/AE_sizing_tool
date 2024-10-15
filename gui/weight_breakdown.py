@@ -72,6 +72,7 @@ def histo_weights(segment_list: List[sg.segments]):
 
 
 def print_Final_Design():
+    print("\n")
     print("############################################")
     print("Final Design")
     print("############################################")
@@ -82,6 +83,8 @@ def print_Final_Design():
     print(Aircraft.Design.Sea_level_Thrust)
     print(Aircraft.Design.Fuel_Weight)
     print("############################################")
+    print("############################################")
+    print("\n")
 
     def generate_table():
         with open("outputs/final_design_results.html", "w") as file:
@@ -126,8 +129,5 @@ def print_Final_Design():
             </table>
             """
             file.write(html_table)
-            print(
-                "HTML file 'outputs/final_design_results.html' generated successfully."
-            )
 
     generate_table()

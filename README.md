@@ -94,7 +94,7 @@ Here is a list of the available phases you can add:
 
 To run the tool with your own input files, be careful to modify the name of the inputs file in the `Main.py` and simply run the main script:
 ```bash
-python Main.py
+python Main.py < My_Mission_Profile.json >
 ```
 ## Output
 
@@ -104,7 +104,7 @@ After Running the tool , mains results will be printed in a console and three gr
 >**If the graphs are not displayed, please refresh the page (F5) where the graphs are displayed. (sometimes Plotly has issues with displaying the graphs)**
 
 ### Output folder## 
-Also : All the results will be saved in the `outputs` folder in a HTML file you can open it in your browser .
+If graphs dispalying doesn't work , All the results will be saved in the `outputs` folder in HTML files you can open it in your browser . (Both graphs and final design variables)
 ## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request.

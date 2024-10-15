@@ -67,7 +67,7 @@ def main_loop(
 
     for i in range(max_iteration):
         WTO = WTO_computed(Beta_final, WC, WP, guess_WTO)
-        print(f"Iteration {i} WTO")
+        # print(f"Iteration {i} WTO")
         if np.abs(WTO - guess_WTO) < 1:
             print(f"Convergence WTO reached at iteration {i}")
             break

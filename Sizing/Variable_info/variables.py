@@ -56,12 +56,12 @@ class Aircraft:
     class Design:
         TOW = Variable("TOW", 1, "lbf", description="Takeoff weight")
         WING_LOADING = Variable(
-            "wing_loading", unit="lbf/sq^2", description="Wing loading of the aircraft"
+            "wing_loading", unit="lbf/ft^2", description="Wing loading of the aircraft"
         )
         THRUST_TO_WEIGHT = Variable(
             "thrust_to_weight", unit="", description="Thrust to weight ratio"
         )
-        Wing_Area = Variable("Wing_Area", 1, "sq^2", description="Wing Area")
+        Wing_Area = Variable("Wing_Area", 1, "ft^2", description="Wing Area")
         Weight_fractions = Variable(
             "Weight_fractions",
             value=[],
