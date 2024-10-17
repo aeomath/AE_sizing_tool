@@ -163,7 +163,7 @@ def Compute_Beta_Approach(WSR, TWR, approach_leg: approach_segment.approach, ste
 
 def Compute_Mission_Profile_Parametric(
     WSR, TWR, segments_list: List[segments]
-) -> float:
+) -> tuple[list, List[segments]]:
     """
     Computes the mission profile parametrically based on the given wing loading ratio (WSR) and thrust-to-weight ratio (TWR).
     Args:
@@ -173,37 +173,41 @@ def Compute_Mission_Profile_Parametric(
     Returns:
         list: A list containing the mission profile parameters computed for each segment.
     """
-    Beta = 1  ## Initial weight fraction
+    updated_segments_list = segments_list
+    Beta = updated_segments_list[0].weight_fraction.value  ## Initial weight fraction
     Betas_list = []
-    for i in tqdm(range(len(segments_list))):
-        segments_list[i].weight_fraction.value = Beta
+    for i in tqdm(range(len(updated_segments_list))):
         match segments_list[i].type:
             case "Climb":
-                if segments_list[i].is_additional_constraint:
-                    Beta *= 1
-                else:
-                    Beta = Compute_Beta_Climb(WSR, TWR, segments_list[i], step=500)
+                Beta = Compute_Beta_Climb(WSR, TWR, updated_segments_list[i], step=500)
             case "Cruise":
-                if segments_list[i].is_additional_constraint:
-                    Beta *= 1
-                else:
-                    Beta = Compute_Beta_Cruise(WSR, segments_list[i], steps=10)
+                Beta = Compute_Beta_Cruise(WSR, updated_segments_list[i], steps=10)
             case "Approach":
-                Beta = Compute_Beta_Approach(WSR, TWR, segments_list[i], steps=100)
+                Beta = Compute_Beta_Approach(
+                    WSR, TWR, updated_segments_list[i], steps=100
+                )
             case "Acceleration":
-                Beta = Compute_Beta_Acceleration(WSR, TWR, segments_list[i], step=5)
+                Beta = Compute_Beta_Acceleration(
+                    WSR, TWR, updated_segments_list[i], step=5
+                )
             case _:
-                Beta *= float(segments_list[i].wf_wi(WSR, TWR))
-        ##print for debugging, uncomment if needed
+                Beta *= float(updated_segments_list[i].wf_wi(WSR, TWR))
         # print(
         #     "Phase ",
-        #     segments_list[i].phase_number,
+        #     updated_segments_list[i].phase_number,
         #     "type : ",
-        #     segments_list[i].type,
+        #     updated_segments_list[i].type,
         #     " Beta : ",
         #     Beta,
         #     "name : ",
-        #     segments_list[i].name,
+        #     updated_segments_list[i].name,
         # )
         Betas_list.append(float(Beta))
-    return Betas_list
+        if i != len(updated_segments_list) - 1:
+            updated_segments_list[i + 1].weight_fraction.value = float(Beta)
+            ## Update the next segment with the computed beta, except for the last segment...
+
+    # print(
+    #     "Betas_updated", [self.weight_fraction.value for self in updated_segments_list]
+    # )
+    return Betas_list, updated_segments_list

@@ -22,12 +22,17 @@ def Iter_Beta(
 
     for i in range(max_iteration):
         tqdm.write(f"Starting iteration {i} for Beta loop, WSR: {WSR}, TWR: {TWR}")
-        betas_list = Main_Mission_Parametric.Compute_Mission_Profile_Parametric(
-            WSR, TWR, segments_list=segments_list
+        betas_list, updated_segments_list = (
+            Main_Mission_Parametric.Compute_Mission_Profile_Parametric(
+                WSR, TWR, segments_list
+            )
         )
+        # betas_updated = [self.weight_fraction.value for self in updated_segments_list]
+        # print(f"Betas_updated: {betas_updated}")
         constraints = Constraints_Parametric.constraint_analysis_main(
-            segments_list, plot=False
+            updated_segments_list, plot=False
         )
+        segments_list = updated_segments_list
         WSR = constraints[0]
         TWR = constraints[1]
         if np.abs(WSR - WSR_old) < tolerance and np.abs(TWR - TWR_old) < tolerance:
@@ -36,7 +41,12 @@ def Iter_Beta(
             break
         WSR_old = WSR
         TWR_old = TWR
-    return WSR, TWR, segments_list, betas_list[-1], betas_list, constraints
+        # print("beta list", betas_list)
+        # print(
+        #     "Betas_updated",
+        #     [self.weight_fraction.value for self in updated_segments_list],
+        # )
+    return WSR, TWR, updated_segments_list, betas_list[-1], betas_list, constraints
 
 
 def gamma(WTO):
@@ -45,7 +55,7 @@ def gamma(WTO):
 
 
 def main_loop(
-    Mission,
+    Mission: List[segments],
     WC,
     WP,
     guess_WTO,
@@ -55,9 +65,11 @@ def main_loop(
     TWR_guess=0.3,
 ):
     iter_beta = Iter_Beta(Mission, max_iteration, tolerance, WSR_guess, TWR_guess)
-    Beta_final = iter_beta[3]
+
     WSR = iter_beta[0]
     TWR = iter_beta[1]
+    updated_segments_list = iter_beta[2]
+    Beta_final = iter_beta[3]
     list_betas = iter_beta[4]
     constraints = iter_beta[5]
 
@@ -71,4 +83,4 @@ def main_loop(
             print(f"Convergence WTO reached at iteration {i}")
             break
         guess_WTO = WTO
-    return (WTO, WSR, TWR, Beta_final, list_betas, constraints)
+    return (WTO, WSR, TWR, Beta_final, list_betas, constraints, updated_segments_list)

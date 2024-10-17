@@ -41,7 +41,6 @@ def main(mission_file):
 
     # Load the mission profile from the specified mission file
     mission_data = df.load_mission_profile(os.path.join(Inputs_dir, mission_file))
-
     # Run the case
     results = bl.main_loop(
         Mission=mission_data,
@@ -60,6 +59,7 @@ def main(mission_file):
     Beta_final = results[3]
     Beta_list = results[4]
     constraints = results[5]
+    updated_segments_list = results[6]
 
     wing_loading_range = constraints[2]
     thrust_weight_lists = constraints[3]
@@ -71,7 +71,9 @@ def main(mission_file):
     Aircraft.Design.TOW.value = WTO
     Aircraft.Design.WING_LOADING.value = WSR
     Aircraft.Design.THRUST_TO_WEIGHT.value = TWR
-    Aircraft.Design.Weight_fractions.value = Beta_list
+    Aircraft.Design.Weight_fractions.value = [
+        seg.weight_fraction.value for seg in updated_segments_list
+    ]
     Aircraft.Design.Wing_Area.value = WTO / WSR
     Aircraft.Design.Sea_level_Thrust.value = TWR * WTO
     Aircraft.Geometry.Wing.Span.value = (
@@ -91,9 +93,9 @@ def main(mission_file):
     Aircraft.Design.Fuel_Weight.value = fuel_weight(WTO, Beta_final)
 
     # Display the results using the GUI
-    gui.aero_prop.plots_aero_prop(mission_data)
-    gui.weight_breakdown.combined_weight_plot(mission_data)
-    gui.Constraints_plot.T_WS_WS_diagram(mission_data)
+    gui.aero_prop.plots_aero_prop(updated_segments_list)
+    gui.weight_breakdown.combined_weight_plot(updated_segments_list)
+    gui.Constraints_plot.T_WS_WS_diagram(updated_segments_list)
     gui.weight_breakdown.print_Final_Design()
     gui.Constraints_plot.constraints_plots(
         wing_loading=wing_loading_range,

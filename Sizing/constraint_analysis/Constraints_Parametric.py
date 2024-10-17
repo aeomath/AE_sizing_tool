@@ -14,12 +14,33 @@ from typing import List
 
 
 def constraint_analysis_main(segment_list: List[segments], plot=False):
+    """
+    Perform constraint analysis for a given list of flight segments.
+    This function calculates the thrust-to-weight ratios for various wing loadings
+    across different flight segments, determines additional project-specific constraints,
+    and identifies the feasible design space and design point.
+    Args:
+        segment_list (List[segments]): A list of flight segments, each containing
+            relevant data such as name, phase number, type, and weight fraction.
+        plot (bool, optional): If True, plots the results. Defaults to False.
+    Returns:
+        tuple: A tuple containing the following elements:
+            - wing_loading_design (float): The wing loading at the design point.
+            - TWR_design (float): The thrust-to-weight ratio at the design point.
+            - wing_loading (np.ndarray): Array of wing loading values.
+            - Thrusts_Weight_ratios (List[np.ndarray]): List of thrust-to-weight ratio arrays for each segment.
+            - y_max (np.ndarray): Maximum thrust-to-weight ratios across all segments.
+            - wing_loading_landing (float): Wing loading constraint for landing.
+            - names (List[str]): List of segment names.
+    """
     wing_min = 30
     wing_max = 170
     num_points = 700
     wing_loading = np.linspace(wing_min, wing_max, num_points)
     Thrusts_Weight_ratios = []
     names = []
+    # betas = [self.weight_fraction.value for self in segment_list]
+    # print("betas", betas)
     # print("len(segment_list)", len(segment_list))
     for i in range(len(segment_list)):
         names.append(segment_list[i].name)
@@ -33,7 +54,7 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
         if segment_list[i].type == "Landing":
             landing_segment = segment_list[i]  ## Save the landing segment for later
         ## Test if the sement is top of climb
-        if segment_list[i].phase_number == 6:
+        if segment_list[i].phase_number == 7:  ## Top of climb = begining of cruise
             weight_fraction_top_of_climb = segment_list[i].weight_fraction.value
 
     """ADDITIONAL CONSTRAINTS SPECIFIC TO THE PROJECT"""
@@ -48,7 +69,7 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
     wing_loading_landing = float(landing_segment.landing_constraint())
     """END OF LANDING CONSTRAINT"""
 
-    """Find the feasible design space and Design Point"""
+    """Find the feasible design space and Design Point see report section VI.J"""
     y_max = np.max(Thrusts_Weight_ratios, axis=0)
     # Find the index of the minimum in the envelope curve
     min_index = np.argmin(y_max)

@@ -1,6 +1,16 @@
 import numpy as np
 from Sizing.Variable_info.variables import Aircraft
 
+"""
+This module contains functions related to propulsion assumptions for aircraft sizing.
+See section IV.A of the report for more details.
+Functions:
+    thrust_lapse(Mach_inf, density_ratio):
+        Calculates the thrust lapse of the engine, which is used to determine the thrust required at different altitudes.
+    TSFC(Mach_inf, Temp_ratio):
+        Calculates the thrust specific fuel consumption (TSFC) of the engine, which is used to determine the fuel consumption at different altitudes.
+"""
+
 
 def thrust_lapse(Mach_inf, density_ratio):
     """

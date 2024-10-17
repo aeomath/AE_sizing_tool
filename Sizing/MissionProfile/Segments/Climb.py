@@ -267,7 +267,7 @@ class climb(segments):
             if ROC is not None:
                 V_start = utils.Mach_to_TAS(self.MACH.value, start_alt)
                 V_end = utils.Mach_to_TAS(self.MACH.value, end_alt)
-                V = (V_start + V_end) / 2
+                V = utils.knots_to_fts((V_end + V_start / 2))
                 climb_term = (ROC / 60) / V
             ## if flight path angle is given, use it to calculate the climb term
             elif self.flight_path_angle is not None:
@@ -296,6 +296,7 @@ class climb(segments):
         linear_term = K1 * (beta / q) * wing_loading
         Inverse_ter = Cd0 / ((beta / q) * wing_loading)
         T_W = (beta / alpha) * (linear_term + K2 + Inverse_ter + climb_term)
+        # print(self.name, beta)
         if self.type != "Climb":
             return 0 * wing_loading
         return T_W
@@ -337,6 +338,13 @@ class climb(segments):
         return np.exp(-tsfc / utils.knots_to_fts(TAS_knots) * delta / (1 - u))
 
     def alpha_seg(self, WSR):
+        """
+        Calculate the thrust lapse for a given weight-to-surface ratio (WSR).
+        Parameters:
+        WSR (float): Weight-to-surface ratio of the aircraft.
+        Returns:
+        float: Thrust lapse value.
+        """
         return self.thrust_lapse()
 
     def lift_drag_ratio(self, wing_loading):

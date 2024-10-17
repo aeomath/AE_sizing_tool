@@ -1,8 +1,11 @@
-import ussa1976 as ussa
 import numpy as np
 from Sizing.utils.atmosphere import Atmosphere, SL_SOUND_SPEED
-from Sizing.aerodynamics.Assumptions import K1, K2
-import Sizing.aerodynamics.Assumptions as Sizing_aerodynamics_Assumptions
+
+
+"""
+This module provides various utility functions for unit conversions and calculations related 
+to aircraft speeds and altitudes.
+"""
 
 SOUND_SPEED_AT_SEA_LEVEL = 340.29  # m/s
 

@@ -63,7 +63,7 @@ def example():
     climb_to_crossover = climb_segment.climb(
         start_altitude=10000,
         end_altitude=utils.crossover_altitude(Goal_Mach, 290),
-        climb_rate=1500,
+        climb_rate=3000,
         KEAS=290,
         time=None,
         weight_fraction=acceleration1.weight_fraction.value,

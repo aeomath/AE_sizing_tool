@@ -10,6 +10,9 @@ from typing import List
 from Sizing.MissionProfile.segments import segments
 import numpy as np
 
+""" Additional constraints for the aircraft design
+Creates a list of segments for the additional constraints of the aircraft design"""
+
 
 def Additional_constraints(
     name_list,
@@ -38,7 +41,7 @@ def Additional_constraints(
     max_Mach = 0.82
     maximum_mach_segment = cruise_segment.cruise(
         altitude=35000,
-        range=500,
+        range=500,  ## not important for the constraint analysis
         weight_fraction=Weight_fraction_top_of_climb,
         Mach=max_Mach,
         name="Maximum Mach Number",
@@ -68,8 +71,8 @@ def Additional_constraints(
     takeoff_speed = takeoff_one_engine.takeoff_EAS_speed(Wing_loading) * 1.2
     climb_one_engine_segment = climb_segment.climb(
         KEAS=takeoff_speed,
-        start_altitude=0,
-        end_altitude=3000,
+        start_altitude=35,
+        end_altitude=500,
         time=None,
         weight_fraction=1,  ## Worst case scenario
         flight_path_angle=path_angle,

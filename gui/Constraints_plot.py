@@ -35,7 +35,7 @@ def T_WS_WS_diagram(segment_list: List[sg.segments]):
     ## Check if the number of alphas is the same as the number of segments
     assert len(alphas) == len(Betas_list)
     TWR = [float(alphas[i]) / Betas_list[i] * TWR_to for i in range(len(Betas_list))]
-    WSR = [float(alphas[i]) / Betas_list[i] * WSR_to for i in range(len(Betas_list))]
+    WSR = [Betas_list[i] * WSR_to for i in range(len(Betas_list))]
     fig = go.Figure()
 
     # Add traces for TWR and WSR

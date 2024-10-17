@@ -55,7 +55,7 @@
             "phase_number": 5,
             "KEAS": 290,
             "MACH": null,
-            "climb_rate": 1500,
+            "climb_rate": 3000,
             "flight_path_angle": null,
             "start_altitude": 10000,
             "end_altitude": 28700,
