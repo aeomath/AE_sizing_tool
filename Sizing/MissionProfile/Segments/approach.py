@@ -81,7 +81,7 @@ class approach(segments):
             * utils.knots_to_fts(speed_EAS) ** 2
         )
         Cd0 = self.Cd0()
-        alpha = self.alpha()
+        alpha = self.percent_fuel_flow.value
         linear_term = K1 * (beta / q) * wing_loading
         Inverse_ter = Cd0 / ((beta / q) * wing_loading)
         T_W = (beta / alpha) * (
@@ -118,7 +118,7 @@ class approach(segments):
             self.alpha() * self.percent_fuel_flow.value * self.Cl(wing_loading) * TWR
         )
 
-    def tsfc(self):
+    def tsfc(self, wing_loading):
         tsfc_start = propulsion.TSFC(
             utils.KEAS_to_Mach(self.KEAS.value, self.start_altitude.value),
             Atmosphere(self.start_altitude.value).temperature_ratio.value,
@@ -128,6 +128,17 @@ class approach(segments):
             Atmosphere(self.end_altitude.value).temperature_ratio.value,
         )
         return (tsfc_start + tsfc_end) / 2
+
+    def TAS_knots(self):
+        TAS_start = utils.KEAS_to_TAS(self.KEAS.value, self.start_altitude.value)
+        TAS_end = utils.KEAS_to_TAS(self.KEAS.value, self.end_altitude.value)
+        return (TAS_start + TAS_end) / 2  # Average TAS in knots
+
+    def delta_t(self):
+        TAS = utils.knots_to_fts(self.TAS_knots())
+        "" "Estimation of time for the approach segment" ""
+        delta_h = abs(self.start_altitude.value - self.end_altitude.value)
+        return delta_h / (TAS * np.sin(self.flight_path_angle.value * np.pi / 180))
 
     def wf_wi(self, WSR, TWR):
         """
@@ -140,17 +151,12 @@ class approach(segments):
         float: The weight fraction after the climb phase. Wendclimb/Wstart
         The function takes into account the climb segment of the mission.
         """
-        TAS_start = utils.KEAS_to_TAS(self.KEAS.value, self.start_altitude.value)
-        TAS_end = utils.KEAS_to_TAS(self.KEAS.value, self.end_altitude.value)
-        TAS_knots = (TAS_start + TAS_end) / 2  # Average TAS in knots
-        u = self.u(WSR, TWR)
-        alt_accel_end = self.end_altitude.value + utils.knots_to_fts(TAS_end) ** 2 / (
-            2 * const.SL_GRAVITY_FT
-        )
-        alt_accel_start = self.start_altitude.value + utils.knots_to_fts(
-            TAS_start
-        ) ** 2 / (2 * const.SL_GRAVITY_FT)
-        tsfc = self.tsfc()
-        delta = alt_accel_end - alt_accel_start
-        # return np.exp(-tsfc / utils.knots_to_fts(TAS_knots) * delta / (1 - u))
-        return 1  ## For now, return 1, ##FIXME : Implement the correct formula, the above formula is not correct
+        alpha = self.alpha()
+        beta = self.weight_fraction.value
+        return np.exp(-self.tsfc(WSR) * alpha / beta * TWR * self.delta_t())
+
+    def alpha_seg(self, WSR):
+        return self.alpha()
+
+    def lift_drag_ratio(self, wing_loading):
+        return self.Cl(wing_loading) / self.Cd(wing_loading)

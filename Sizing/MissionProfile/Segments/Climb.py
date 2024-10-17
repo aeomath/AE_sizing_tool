@@ -6,6 +6,7 @@ from Sizing.utils.atmosphere import Atmosphere
 import numpy as np
 import Sizing.utils.Constants as const
 from Sizing.MissionProfile.segments import segments
+from Sizing.Variable_info.variables import Aircraft
 
 
 class climb(segments):
@@ -183,7 +184,7 @@ class climb(segments):
             self.thrust_lapse() * self.Cl(wing_loading) * TWR
         )
 
-    def tsfc(self):
+    def tsfc(self, wing_loading):
         """
         Calculate the average thrust-specific fuel consumption (TSFC) between start and end altitude.
         Returns:
@@ -295,6 +296,8 @@ class climb(segments):
         linear_term = K1 * (beta / q) * wing_loading
         Inverse_ter = Cd0 / ((beta / q) * wing_loading)
         T_W = (beta / alpha) * (linear_term + K2 + Inverse_ter + climb_term)
+        if self.type != "Climb":
+            return 0 * wing_loading
         return T_W
 
     ## Override
@@ -326,9 +329,15 @@ class climb(segments):
         alt_accel_start = self.start_altitude.value + utils.knots_to_fts(
             TAS_start
         ) ** 2 / (2 * const.SL_GRAVITY_FT)
-        tsfc = self.tsfc()
+        tsfc = self.tsfc(WSR)
         delta = alt_accel_end - alt_accel_start
         if self.type != "Climb":
             # print("Descending : no fuel burned for phase", self.phase_number)
             return 1
         return np.exp(-tsfc / utils.knots_to_fts(TAS_knots) * delta / (1 - u))
+
+    def alpha_seg(self, WSR):
+        return self.thrust_lapse()
+
+    def lift_drag_ratio(self, wing_loading):
+        return self.Cl(wing_loading) / self.Cd(wing_loading)

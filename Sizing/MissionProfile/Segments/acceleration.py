@@ -19,12 +19,20 @@ class acceleration(segments):
         phase_number=-1,
         name=None,
     ):
-        super().__init__(
-            "Acceleration",
-            phase_number=phase_number,
-            weight_fraction=weight_fraction,
-            name=name,
-        )
+        if KEAS_start < KEAS_end:
+            super().__init__(
+                "Acceleration",
+                phase_number=phase_number,
+                weight_fraction=weight_fraction,
+                name=name,
+            )
+        else:
+            super().__init__(
+                "Deceleration",
+                phase_number=phase_number,
+                weight_fraction=weight_fraction,
+                name=name,
+            )
         self.KEAS_start = Variable(
             "KEAS_start", KEAS_start, "KEAS", "Start Equivalent airspeed"
         )
@@ -55,7 +63,7 @@ class acceleration(segments):
             "End of acceleration Mach number",
         )
 
-    def tsfc(self):
+    def tsfc(self, wing_loading):
         tsfc_start = propulsion.TSFC(
             self.Mach_start.value,
             Atmosphere(self.altitude.value).temperature_ratio.value,
@@ -159,4 +167,10 @@ class acceleration(segments):
         )
         V = utils.knots_to_fts(V_start + V_end) / 2
         delta_V = (V_end**2 - V_start**2) / (2 * const.SL_GRAVITY_FT)
-        return np.exp(-self.tsfc() / V * delta_V / (1 - self.u(WSR, TWR)))
+        return np.exp(-self.tsfc(WSR) / V * delta_V / (1 - self.u(WSR, TWR)))
+
+    def alpha_seg(self, WSR):
+        return self.thrust_lapse()
+
+    def lift_drag_ratio(self, wing_loading):
+        return self.Cl(wing_loading) / self.Cd(wing_loading)

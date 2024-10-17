@@ -7,7 +7,16 @@ from Sizing.Variable_info.variables import Aircraft
 import os
 
 
-def weight_breakdown():
+def combined_weight_plot(segment_list: List[sg.segments]):
+    """
+    Generates a combined plot with a dropdown menu to switch between weight breakdown and weight per phase.
+    Args:
+        segment_list (List[sg.segments]): A list of flight segments, where each segment contains a phase number.
+    Returns:
+        plotly.graph_objs._figure.Figure: The generated figure with dropdown menu.
+    """
+
+    # Data for weight breakdown
     Wcrew = Aircraft.Payload.Wcrew.value
     Wpayload = Aircraft.Payload.Wpayload.value
     Wempty = Aircraft.Structure.Empty_Weight.value
@@ -20,54 +29,88 @@ def weight_breakdown():
         "Payload": Wpayload,
         "Wcrew": Wcrew,
     }
+
+    # Data for weight per phase
+    Betas_list = Aircraft.Design.Weight_fractions.value
+    weights = [
+        Betas_list[i] * Aircraft.Design.TOW.value for i in range(len(Betas_list))
+    ]
+    names = [str(segment.name) for segment in segment_list]
+
     fig = go.Figure()
+
+    # Add traces for weight breakdown
     fig.add_trace(
         go.Bar(
             x=list(weight_dict.keys()),
             y=list(weight_dict.values()),
             marker=dict(color=["blue", "green", "red", "purple", "orange"]),
+            name="Weight Breakdown",
         )
     )
+
+    # Add traces for weight per phase (line graph)
+    fig.add_trace(
+        go.Scatter(
+            x=names,
+            y=weights,
+            mode="lines+markers",
+            marker=dict(color="purple"),
+            name="Weight per Phase",
+        )
+    )
+
+    # Create a dropdown menu
+    dropdown_buttons = [
+        {
+            "label": "Weight Breakdown",
+            "method": "update",
+            "args": [
+                {"visible": [True, False]},
+                {
+                    "title": "Weight Breakdown",
+                    "xaxis": {"title": "Weight Categories"},
+                    "yaxis": {"title": "Weight (lbs)"},
+                },
+            ],
+        },
+        {
+            "label": "Weight per Phase",
+            "method": "update",
+            "args": [
+                {"visible": [False, True]},
+                {
+                    "title": "Weight per Phase",
+                    "xaxis": {"title": "Flight Phases"},
+                    "yaxis": {"title": "Weight (lbs)"},
+                },
+            ],
+        },
+    ]
+
+    # Add dropdown menu to the layout
+    fig.update_layout(
+        updatemenus=[
+            {
+                "buttons": dropdown_buttons,
+                "direction": "down",
+                "showactive": True,
+            }
+        ]
+    )
+
+    # Set initial visibility
+    fig.data[0].visible = True
+    fig.data[1].visible = False
     fig.update_layout(
         title="Weight Breakdown",
-        xaxis_title="Weight Components",
+        xaxis_title="Weight Categories",
         yaxis_title="Weight (lbs)",
-        xaxis=dict(tickmode="array", tickvals=list(weight_dict.keys())),
-        yaxis=dict(tickformat=","),
     )
-    if not os.path.exists("images"):
-        os.mkdir("images")
-    fig.write_html("outputs/weight_breakdown.html")
+    if not os.path.exists("outputs"):
+        os.mkdir("outputs")
+    fig.write_html("outputs/combined_weight_plot.html")
     fig.show()
-    return fig
-
-
-def histo_weights(segment_list: List[sg.segments]):
-    Betas_list = Aircraft.Design.Weight_fractions.value
-    weights = [
-        Betas_list[i] * Aircraft.Design.TOW.value for i in range(len(Betas_list))
-    ]
-    phases = [str(segment.phase_number) for segment in segment_list]
-
-    fig = go.Figure()
-    fig.add_trace(
-        go.Bar(
-            x=phases,
-            y=weights,
-            marker=dict(color="purple"),
-        )
-    )
-    fig.update_layout(
-        title="Weight per Phase",
-        xaxis_title="Flight Phases",
-        yaxis_title="Weight (lbs)",
-        xaxis=dict(tickmode="array", tickvals=phases),
-        yaxis=dict(tickformat=","),
-    )
-    fig.show()
-    if not os.path.exists("images"):
-        os.mkdir("images")
-    fig.write_html("outputs/weight_per_phase.html")
     return fig
 
 
@@ -82,6 +125,8 @@ def print_Final_Design():
     print(Aircraft.Design.Wing_Area)
     print(Aircraft.Design.Sea_level_Thrust)
     print(Aircraft.Design.Fuel_Weight)
+    print(Aircraft.Geometry.Wing.Span)
+    print(Aircraft.Geometry.Wing.Aspect_Ratio)
     print("############################################")
     print("############################################")
     print("\n")
@@ -116,6 +161,16 @@ def print_Final_Design():
                 <td>{Aircraft.Design.Wing_Area.value}</td>
                 <td>{Aircraft.Design.Wing_Area.unit}</td>
             </tr>
+            <tr>
+                <td>Wing Aspect ratio </td>
+                <td>{Aircraft.Geometry.Wing.Aspect_Ratio.unit}</td>
+                <td>{Aircraft.Geometry.Wing.Aspect_Ratio.unit}</td>
+            </tr>  
+            <tr>
+                <td>Wing Span</td>
+                <td>{Aircraft.Geometry.Wing.Span.value}</td>
+                <td>{Aircraft.Geometry.Wing.Span.unit}</td>
+            </tr>          
             <tr>
                 <td>Sea Level Thrust</td>
                 <td>{Aircraft.Design.Sea_level_Thrust.value}</td>

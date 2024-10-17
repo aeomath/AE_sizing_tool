@@ -54,9 +54,14 @@ with open(file_path_payload, "r") as file:
 
 class Aircraft:
     class Design:
-        TOW = Variable("TOW", 1, "lbf", description="Takeoff weight")
+        TOW = Variable(
+            name="TOW", value=1, unit="lbf", description="Ramp weight of the aircraft"
+        )
         WING_LOADING = Variable(
-            "wing_loading", unit="lbf/ft^2", description="Wing loading of the aircraft"
+            "wing_loading",
+            value=1,
+            unit="lbf/ft^2",
+            description="Wing loading of the aircraft",
         )
         THRUST_TO_WEIGHT = Variable(
             "thrust_to_weight", unit="", description="Thrust to weight ratio"
@@ -74,6 +79,33 @@ class Aircraft:
         Fuel_Weight = Variable(
             "Fuel_Weight", 1, "lbf", description="Weight of the fuel"
         )
+
+    class Geometry:
+        class Wing:
+            Aspect_Ratio = Variable(
+                "Aspect_Ratio",
+                value=9.39,  ## Aspect ratio of the wing value from the A320 data
+                unit="",
+                description="Aspect ratio of the wing",
+            )
+            Taper_Ratio = Variable(
+                "Taper_Ratio",
+                value=1,
+                unit="",
+                description="Taper ratio of the wing",
+            )
+            Sweep = Variable(
+                "Sweep",
+                value=25,
+                unit="",
+                description="Sweep of the wing",
+            )
+            Span = Variable(
+                "Span",
+                value=1,
+                unit="ft",
+                description="Span of the wing",
+            )
 
     class Payload:
         Npax = Variable(

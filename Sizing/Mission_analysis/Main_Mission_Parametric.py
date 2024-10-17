@@ -190,6 +190,8 @@ def Compute_Mission_Profile_Parametric(
                     Beta = Compute_Beta_Cruise(WSR, segments_list[i], steps=10)
             case "Approach":
                 Beta = Compute_Beta_Approach(WSR, TWR, segments_list[i], steps=100)
+            case "Acceleration":
+                Beta = Compute_Beta_Acceleration(WSR, TWR, segments_list[i], step=5)
             case _:
                 Beta *= float(segments_list[i].wf_wi(WSR, TWR))
         ##print for debugging, uncomment if needed

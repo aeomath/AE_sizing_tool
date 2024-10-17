@@ -6,6 +6,7 @@ from Sizing.utils.atmosphere import Atmosphere
 import numpy as np
 import Sizing.utils.Constants as const
 from Sizing.MissionProfile.segments import segments
+from Sizing.Variable_info.variables import Aircraft
 
 
 class cruise(segments):
@@ -132,7 +133,7 @@ class cruise(segments):
                 Atmosphere(self.altitude.value).density_ratio.value,
             )
 
-    def tsfc(self):
+    def tsfc(self, wing_loading):
         altitude = self.altitude.value
         theta = Atmosphere(altitude).temperature_ratio.value
         if self.Mach.value is not None:
@@ -147,7 +148,13 @@ class cruise(segments):
         Cd = self.Cd(WSR)
         Cl = self.Cl(WSR)
         # print(Cl)
-        return np.exp(-self.tsfc() / TAS_fts * delta_s * Cd / Cl)
+        return np.exp(-self.tsfc(WSR) / TAS_fts * delta_s * Cd / Cl)
+
+    def alpha_seg(self, WSR):
+        return self.thrust_lapse()
+
+    def lift_drag_ratio(self, wing_loading):
+        return self.Cl(wing_loading) / self.Cd(wing_loading)
 
 
 class Loiter(segments):
@@ -191,9 +198,9 @@ class Loiter(segments):
             Mach = new_Mach
         return speed
 
-    def tsfc(self, Wing_Loading):
+    def tsfc(self, wing_loading):
         altitude = self.altitude.value
-        EAS = self.iter_best_L_D_speed_EAS(Wing_Loading)
+        EAS = self.iter_best_L_D_speed_EAS(wing_loading)
         theta = Atmosphere(altitude).temperature_ratio.value
         return propulsion.TSFC(utils.KEAS_to_Mach(EAS, altitude), theta)
 
@@ -226,3 +233,26 @@ class Loiter(segments):
         Inverse_term = Cd0 / ((beta / q) * wing_loading)
         T_W = (beta / alpha) * (linear_term + K2 + Inverse_term)
         return T_W
+
+    def alpha_seg(self, WSR):
+        EAS = self.iter_best_L_D_speed_EAS(WSR)
+        Mach = utils.KEAS_to_Mach(EAS, self.altitude.value)
+        alpha = propulsion.thrust_lapse(
+            Mach, Atmosphere(self.altitude.value).density_ratio.value
+        )
+        return alpha
+
+    def Cl(self, wing_loading):
+        EAS = self.iter_best_L_D_speed_EAS(wing_loading)
+        q = 0.5 * Atmosphere(0).density_slug_ft3.value * utils.knots_to_fts(EAS) ** 2
+        return (wing_loading * self.weight_fraction.value) / q
+
+    def Cd(self, wing_loading):
+        return (
+            self.Cd0(wing_loading)
+            + aerodynamics.K1 * self.Cl(wing_loading) ** 2
+            + aerodynamics.K2 * self.Cl(wing_loading)
+        )
+
+    def lift_drag_ratio(self, wing_loading):
+        return self.Cl(wing_loading) / self.Cd(wing_loading)

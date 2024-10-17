@@ -1,7 +1,6 @@
 {
     "phases": [
         {
-            "name": "Taxi_out",
             "type": "taxi",
             "weight_fraction": 1,
             "phase_number": 1,
@@ -11,7 +10,6 @@
             "altitude": 0
         },
         {
-            "name": "Takeoff",
             "type": "takeoff",
             "weight_fraction": 1,
             "phase_number": 2,
@@ -25,7 +23,6 @@
             "tr": 3
         },
         {
-            "name": "First_climb",
             "type": "climb",
             "weight_fraction": 1,
             "phase_number": 3,
@@ -39,7 +36,6 @@
             "is_additional_constraint": false
         },
         {
-            "name": "First Acceleration",
             "type": "acceleration",
             "weight_fraction": 1,
             "phase_number": 4,
@@ -49,7 +45,6 @@
             "altitude": 10000
         },
         {
-            "name": "Climb to crossover",
             "type": "climb",
             "weight_fraction": 1,
             "phase_number": 5,
@@ -63,7 +58,6 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Climb to cruise",
             "type": "climb",
             "weight_fraction": 1,
             "phase_number": 6,
@@ -77,7 +71,6 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Main Cruise",
             "type": "cruise",
             "weight_fraction": 1,
             "phase_number": 7,
@@ -89,8 +82,7 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Descent 1",
-            "type": "climb",
+            "type": "descent",
             "weight_fraction": 1,
             "phase_number": 8,
             "KEAS": 250,
@@ -103,8 +95,7 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Deceleration 1",
-            "type": "acceleration",
+            "type": "deceleration",
             "weight_fraction": 1,
             "phase_number": 9,
             "KEAS_start": 250,
@@ -113,7 +104,6 @@
             "altitude": 3000
         },
         {
-            "name": " first Approach",
             "type": "approach",
             "weight_fraction": 1,
             "phase_number": 10,
@@ -125,24 +115,9 @@
             "weight_fraction_constraint": 0.85
         },
         {
-            "name": "Go around",
-            "type": "takeoff",
-            "weight_fraction": 1,
-            "phase_number": "11a",
-            "takeoff_distance": 5500,
-            "obstacle_height": 0,
-            "mu": 0.05,
-            "Cd_r": 0.07,
-            "Cl_max": 2.56,
-            "kt0": 1.2,
-            "altitude_runway": 0,
-            "tr": 3
-        },
-        {
-            "name": "go_around Climb to 15000",
             "type": "climb",
             "weight_fraction": 1,
-            "phase_number": "11b",
+            "phase_number": "11",
             "KEAS": 250,
             "MACH": null,
             "climb_rate": 3000,
@@ -153,7 +128,6 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Cruise 2",
             "type": "cruise",
             "weight_fraction": 1,
             "phase_number": "12",
@@ -165,7 +139,6 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Loiter for 45 min",
             "type": "loiter",
             "weight_fraction": 1,
             "phase_number": "13",
@@ -173,8 +146,7 @@
             "time": 45
         },
         {
-            "name": "Descent 2",
-            "type": "climb",
+            "type": "descent",
             "weight_fraction": 1,
             "phase_number": "14",
             "KEAS": 250,
@@ -187,8 +159,7 @@
             "is_additional_constraint": false
         },
         {
-            "name": "Deceleration 2",
-            "type": "acceleration",
+            "type": "deceleration",
             "weight_fraction": 1,
             "phase_number": "15",
             "KEAS_start": 250,
@@ -197,7 +168,6 @@
             "altitude": 3000
         },
         {
-            "name": "Second Approach",
             "type": "approach",
             "weight_fraction": 1,
             "phase_number": "16",
@@ -209,7 +179,6 @@
             "weight_fraction_constraint": 0.85
         },
         {
-            "name": "Landing",
             "type": "landing",
             "weight_fraction": 1,
             "phase_number": "17",
@@ -219,7 +188,6 @@
             "weight_fraction_constraint": 0.85
         },
         {
-            "name": "Taxi_in",
             "type": "taxi",
             "weight_fraction": 1,
             "phase_number": "18",

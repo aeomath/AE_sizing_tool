@@ -87,7 +87,9 @@ Here is a list of the available phases you can add:
 * Takeoff
 * Climb
 * Acceleration
-* Deceleration (deceleration with start speed inferior to end speed)
+* Cruise
+* Loiter (in the `cruise.py` file)
+* Deceleration (acceleration with start speed inferior to end speed)
 * Cruise
 * Descent (climb with negative rate or flight path angle)
 * Approach
@@ -99,9 +101,12 @@ python Main.py < My_Mission_Profile.json >
 ```
 ## Output
 
-After Running the tool , mains results will be printed in a console and three graphs will be generated 
+After Running the tool , mains results will be printed in a console graphs will be generated 
 * The first graph shows the constraints analysis plot.
-* The second graph shows the Weight_Breakdown.
+* The second graph shows the Weight_Breakdown and the weight decomposition.
+* The third graph shows some aerodynamics and propulsion characteristics. A dropdown menu is available to select the parameter to display.
+> The graphs are interactive, and you can zoom in and out, pan, and save them as images.
+> All data you see on this graph are datas at the end of the segment.
 >**If the graphs are not displayed, please refresh the page (F5) where the graphs are displayed. (sometimes Plotly has issues with displaying the graphs)**
 
 ### Output folder ### 

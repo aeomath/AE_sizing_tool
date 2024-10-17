@@ -7,10 +7,13 @@ class segments:
         self.type = type
         self.phase_number = phase_number
         self.weight_fraction = Variable(
-            "weight_fraction", weight_fraction, "", "Weight fraction (beta)"
+            "weight_fraction",
+            weight_fraction,
+            "",
+            "Weight fraction (beta) at the end of the segment",
         )  # Weight fraction (beta)
         if name is None:
-            self.name = type + "Phase number" + str(phase_number)
+            self.name = type + " Phase " + str(phase_number)
         else:
             self.name = name
 
@@ -19,15 +22,15 @@ class segments:
         print("error, this method should be implemented in the subclass")
         return 1
 
-    def __str__(self):
-        return "Segment type: " + self.type + "\n" " Phase number: \n " + str(
-            self.phase_number
-        )
-
     @abstractmethod
     def Thrust_Weight_Ratio(self, WSR):
         print("error, this method should be implemented in the subclass")
         pass
+
+    def __str__(self):
+        return "Segment type: " + self.type + "\n" " Phase number: \n " + str(
+            self.phase_number
+        )
 
     def __repr__(self):
         return f"Segment(name={self.name!r}, weight_fraction={self.weight_fraction!r}, attributes={self.__dict__!r})"
@@ -40,3 +43,27 @@ class segments:
             and self.phase_number == other.phase_number
             and self.weight_fraction == other.weight_fraction
         )
+
+    @abstractmethod
+    def lift_drag_ratio(self, wing_loading):
+        return 1
+
+    @abstractmethod
+    ### Method to use when the final WTO of the aircraft is known,
+    # as well as the FINAL Thrust to weight ratio
+    def alpha_seg(self, WSR):
+        return 1
+
+    @abstractmethod
+    def tsfc(self, wing_loading):
+        return 1
+
+    @abstractmethod
+    def Cl(
+        self, wing_loading=None
+    ):  ## Cl is a function of wing loading for some segments
+        return 1
+
+    @abstractmethod
+    def Cd(self, wing_loading=None):
+        return 1

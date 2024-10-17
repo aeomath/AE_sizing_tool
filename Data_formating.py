@@ -77,9 +77,9 @@ def create_phase(phase_data):
         return taxi_segment.Taxi(**phase_data)
     elif phase_type == "takeoff":
         return takeoff_segment.Takeoff(**phase_data)
-    elif phase_type == "climb":
+    elif phase_type == "climb" or phase_type == "descent":
         return climb_segment.climb(**phase_data)
-    elif phase_type == "acceleration":
+    elif phase_type == "acceleration" or phase_type == "deceleration":
         return acceleration_segment.acceleration(**phase_data)
     elif phase_type == "cruise":
         return cruise_segment.cruise(**phase_data)

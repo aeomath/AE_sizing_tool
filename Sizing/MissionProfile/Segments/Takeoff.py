@@ -7,6 +7,7 @@ import numpy as np
 import Sizing.utils.Constants as const
 import Sizing.utils.utils as utils
 from Sizing.MissionProfile.segments import segments
+from Sizing.Variable_info.variables import Aircraft
 
 
 class Takeoff(segments):
@@ -57,18 +58,24 @@ class Takeoff(segments):
         )
         self.tr = Variable("tr", tr, "", "Roration Time")
 
-    @property
-    def Cl(self):
-        return Variable(
-            "Cl", self.Cl_max.value / self.kt0.value**2, "", "Lift coefficient"
+    def Cl(self, wing_loading=None):
+        return self.Cl_max.value / self.kt0.value**2
+
+    def Cd(self, wing_loading):
+        Mach = utils.KEAS_to_Mach(
+            self.takeoff_EAS_speed(wing_loading), self.altitude_runway.value
+        )
+        return (
+            aerodynamics.Cd0(Mach, self.altitude_runway.value)
+            + self.Cl() ** 2 * aerodynamics.K1
+            + aerodynamics.K2 * self.Cl()
         )
 
-    def Cd(self, Mach, altitude):
-        return (
-            aerodynamics.Cd0(Mach, altitude)
-            + self.Cl.value**2 * aerodynamics.K1
-            + aerodynamics.K2 * self.Cl.value
+    def lift_drag_ratio(self, wing_loading):
+        Mach = utils.KEAS_to_Mach(
+            self.takeoff_EAS_speed(wing_loading), self.altitude_runway.value
         )
+        return self.Cl() / self.Cd(wing_loading)
 
     def takeoff_EAS_speed(self, Wing_loading):
         """
@@ -91,14 +98,9 @@ class Takeoff(segments):
 
     def ksi(self, Wing_loading):
         return (
-            self.Cd(
-                utils.KEAS_to_Mach(
-                    self.takeoff_EAS_speed(Wing_loading), self.altitude_runway.value
-                ),
-                self.altitude_runway.value,
-            )
+            self.Cd(wing_loading=Wing_loading)
             + self.Cd_r.value
-            - self.mu.value * self.Cl.value
+            - self.mu.value * self.Cl()
         )
 
     def __Mach__(self, wing_loading):
@@ -183,7 +185,7 @@ class Takeoff(segments):
         Vt0 = self.takeoff_EAS_speed(WSR)
 
         alpha = self.__alpha__(WSR)
-        u = (self.ksi(WSR) / self.Cl.value + self.mu.value) * (old_beta / (alpha * TWR))
+        u = (self.ksi(WSR) / self.Cl() + self.mu.value) * (old_beta / (alpha * TWR))
         WF_over_WI_accel = np.exp(
             -tsfc / const.SL_GRAVITY_FT * (utils.knots_to_fts(Vt0) / (1 - u))
         )
@@ -192,3 +194,6 @@ class Takeoff(segments):
         new_beta = old_beta * WF_over_WI_accel
         Pi_rotation = 1 - tsfc * alpha / new_beta * TWR * self.tr.value
         return Pi_rotation * WF_over_WI_accel
+
+    def alpha_seg(self, WSR):
+        return self.__alpha__(WSR)

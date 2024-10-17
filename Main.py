@@ -21,8 +21,11 @@ import argparse as argparse
 import os
 import Data_formating as df
 import Beta_loop as bl
-import gui.weight_breakdown as gui
+import gui as gui
 from Sizing.Variable_info.variables import Aircraft
+import gui.Constraints_plot
+import gui.aero_prop
+import gui.weight_breakdown
 
 
 def main(mission_file):
@@ -56,6 +59,14 @@ def main(mission_file):
     TWR = results[2]
     Beta_final = results[3]
     Beta_list = results[4]
+    constraints = results[5]
+    print(Beta_list)
+
+    wing_loading_range = constraints[2]
+    thrust_weight_lists = constraints[3]
+    ymax_constraints = constraints[4]
+    wing_loading_landing = constraints[5]
+    names_constraints = constraints[6]
 
     # Adding the final values to the Aircraft class
     Aircraft.Design.TOW.value = WTO
@@ -64,6 +75,9 @@ def main(mission_file):
     Aircraft.Design.Weight_fractions.value = Beta_list
     Aircraft.Design.Wing_Area.value = WTO / WSR
     Aircraft.Design.Sea_level_Thrust.value = TWR * WTO
+    Aircraft.Geometry.Wing.Span.value = (
+        Aircraft.Geometry.Wing.Aspect_Ratio.value * Aircraft.Design.Wing_Area.value
+    ) ** 0.5
 
     # Calculate the empty weight and fuel weight
     def empty_weight(WTO):
@@ -71,15 +85,24 @@ def main(mission_file):
         return WTO * kwe / (WTO**0.06)
 
     def fuel_weight(WTO, beta_final):
-        return (1 - beta_final) * WTO
+        ### 1.06 is obtained from empirical data
+        return 1.06 * (1 - beta_final) * WTO
 
     Aircraft.Structure.Empty_Weight.value = empty_weight(WTO)
     Aircraft.Design.Fuel_Weight.value = fuel_weight(WTO, Beta_final)
 
     # Display the results using the GUI
-    gui.weight_breakdown()
-    gui.histo_weights(mission_data)
-    gui.print_Final_Design()
+    gui.aero_prop.plots_aero_prop(mission_data)
+    gui.weight_breakdown.combined_weight_plot(mission_data)
+    gui.Constraints_plot.T_WS_WS_diagram(mission_data)
+    gui.weight_breakdown.print_Final_Design()
+    gui.Constraints_plot.constraints_plots(
+        wing_loading=wing_loading_range,
+        Thrusts_Weight_ratios=thrust_weight_lists,
+        y_max=ymax_constraints,
+        wing_loading_landing=wing_loading_landing,
+        names=names_constraints,
+    )
     print("Aircraft Design Completed")
 
 

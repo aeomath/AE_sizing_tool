@@ -65,9 +65,9 @@ def Additional_constraints(
 
     gradient_percent = 0.05
     path_angle = np.arctan(gradient_percent) * 180 / np.pi
-    # takeoff_speed = takeoff_one_engine.takeoff_EAS_speed(Wing_loading)
+    takeoff_speed = takeoff_one_engine.takeoff_EAS_speed(Wing_loading) * 1.2
     climb_one_engine_segment = climb_segment.climb(
-        KEAS=150,
+        KEAS=takeoff_speed,
         start_altitude=0,
         end_altitude=3000,
         time=None,

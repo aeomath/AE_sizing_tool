@@ -70,63 +70,12 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
     print(
         f"Design Point: Wing Loading = {wing_loading_design} lb/ft^2, TWR = {TWR_design}"
     )
-
-    """Plotting"""
-    fig = go.Figure()
-    for i, TWR in enumerate(Thrusts_Weight_ratios):
-        fig.add_trace(
-            go.Scatter(
-                x=wing_loading,
-                y=TWR,
-                mode="lines",
-                name=names[i],
-                line=dict(dash="dash" if i < 7 else "solid"),
-            )
-        )
-
-    fig.add_trace(
-        go.Scatter(
-            x=wing_loading,
-            y=y_max,
-            mode="lines",
-            name="feasible design space",
-            line=dict(color="green", width=4),
-        )
+    return (
+        wing_loading_design,
+        TWR_design,
+        wing_loading,
+        Thrusts_Weight_ratios,
+        y_max,
+        wing_loading_landing,
+        names,
     )
-
-    # Remplir l'espace faisable au-dessus de l'enveloppe
-    fig.add_trace(
-        go.Scatter(
-            x=np.concatenate([wing_loading, wing_loading[::-1]]),
-            y=np.concatenate([y_max, np.ones_like(y_max)]),  # Remplir jusqu'à y=1
-            fill="toself",
-            fillcolor="rgba(144, 238, 144, 0.5)",  # Couleur vert clair avec transparence
-            line=dict(color="rgba(255,255,255,0)"),
-            showlegend=False,
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=[wing_loading_landing] * 2,
-            y=[0, max(fig.data[-1].y) * 1.1],
-            mode="lines",
-            name="Landing Constraint",
-            line=dict(dash="dash", color="red"),
-        )
-    )
-
-    fig.update_layout(
-        title="Thrust to Weight Ratio vs Wing Loading",
-        xaxis_title="Wing Loading (lb/ft^2)",
-        yaxis_title="Thrust to Weight Ratio",
-        legend_title="Mission Segments",
-    )
-    if plot:
-        if not os.path.exists("outputs"):
-            os.mkdir("outputs")
-        fig.write_html("outputs/TWR_vs_Wing_Loading.html")
-        # fig.write_image("outputs/TWR_vs_Wing_Loading.png")
-        fig.show()
-
-    return wing_loading_design, TWR_design
