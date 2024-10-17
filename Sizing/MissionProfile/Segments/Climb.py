@@ -229,6 +229,7 @@ class climb(segments):
         2 cases are considered:
         1. Climb at constant Mach number
         2. Climb at constant equivalent airspeed (EAS)
+        see Section VI.C of the Sizing Report for more details.
         Args:
             wing_loading (float): Wing loading in lb/ft^2.
             beta (float): Weight fraction (beta) at the end of the phase.
@@ -312,6 +313,7 @@ class climb(segments):
         Returns:
         float: The weight fraction after the climb phase. Wendclimb/Wstart
         The function takes into account the climb segment of the mission.
+        see Section V.C of the Sizing Report for more details.
         """
         if self.is_additional_constraint:
             return 1
@@ -339,9 +341,9 @@ class climb(segments):
 
     def alpha_seg(self, WSR):
         """
-        Calculate the thrust lapse for a given weight-to-surface ratio (WSR).
-        Parameters:
-        WSR (float): Weight-to-surface ratio of the aircraft.
+        Calculate the thrust lapse
+        Parameters: Optional
+        WSR (float): Weight-to-surface ratio of the aircraft. s
         Returns:
         float: Thrust lapse value.
         """

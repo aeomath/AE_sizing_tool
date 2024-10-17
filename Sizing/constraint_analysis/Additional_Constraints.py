@@ -11,7 +11,9 @@ from Sizing.MissionProfile.segments import segments
 import numpy as np
 
 """ Additional constraints for the aircraft design
-Creates a list of segments for the additional constraints of the aircraft design"""
+Creates a list of segments for the additional constraints of the aircraft design
+See report for more details section VI.I
+"""
 
 
 def Additional_constraints(

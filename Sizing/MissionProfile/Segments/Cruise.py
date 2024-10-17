@@ -57,6 +57,26 @@ class cruise(segments):
         self,
         wing_loading,
     ):
+        """
+        Calculate the thrust-to-weight ratio for the cruise segment of the mission profile.
+        See section VI.E
+        Parameters:
+        self : object
+            The instance of the class containing attributes such as bank_angle, weight_fraction, altitude, EAS, and Mach.
+        wing_loading : float
+            The wing loading value (weight per unit wing area).
+        Returns:
+        float
+            The calculated thrust-to-weight ratio.
+        Notes:
+        - The function uses the bank angle to determine the load factor.
+        - It calculates the equivalent airspeed (EAS) and Mach number based on the provided values.
+        - The thrust lapse rate is determined using the Mach number and atmospheric density ratio.
+        - The dynamic pressure (q) is calculated using the EAS.
+        - The drag coefficient (Cd0) and aerodynamic constants (K1, K2) are used in the calculation.
+        - The thrust-to-weight ratio is computed considering the load factor, wing loading, and other aerodynamic parameters.
+        """
+
         # print("Cruising segment")
         load_factor = 1 / np.cos(self.bank_angle.value * np.pi / 180)
         beta = self.weight_fraction.value
@@ -142,6 +162,21 @@ class cruise(segments):
             return propulsion.TSFC(utils.KEAS_to_Mach(self.EAS.value, altitude), theta)
 
     def wf_wi(self, WSR, TWR=None):
+        """
+        Calculates the weight fraction for a given wing loading (WSR) and optional thrust-to-weight ratio (TWR).
+        See section V.E of the report for more details.
+        Args:
+            WSR (float): Wing loading ratio.
+            TWR (float, optional): Thrust-to-weight ratio. Defaults to None.
+        Returns:
+            float: The weight fraction.
+        Notes:
+            - Converts the range from nautical miles to feet.
+            - Converts the true airspeed from knots to feet per second.
+            - Calculates the drag coefficient (Cd) and lift coefficient (Cl) based on the wing loading ratio (WSR).
+            - Uses the thrust specific fuel consumption (tsfc) to compute the weight fraction.
+        """
+
         delta_s = utils.nmi_to_ft(self.range.value)
         TAS_fts = utils.knots_to_fts(self.TAS_knots())
         # print(TAS_fts)

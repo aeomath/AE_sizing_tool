@@ -140,6 +140,7 @@ class Takeoff(segments):
         hobst (float, optional): Obstacle height in feet. Default is 35 feet.
         Returns:
         float: Thrust-to-weight ratio required for takeoff.
+        see Report  section VI.B
         """
         altitude = self.altitude_runway.value
         kt0 = self.kt0.value
@@ -176,6 +177,7 @@ class Takeoff(segments):
         Returns:
         float: The weight fraction after the takeoff phase. Wendtakeoff/Wstart
         The function takes into account the acceleration and rotation segments of the takeoff phase.
+        See Section V.B of the Sizing Report for more details.
         """
 
         ### Acceleration segment ###
