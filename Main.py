@@ -60,7 +60,6 @@ def main(mission_file):
     Beta_final = results[3]
     Beta_list = results[4]
     constraints = results[5]
-    print(Beta_list)
 
     wing_loading_range = constraints[2]
     thrust_weight_lists = constraints[3]

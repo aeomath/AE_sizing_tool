@@ -68,7 +68,7 @@ def combined_weight_plot(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [True, False]},
                 {
-                    "title": "Weight Breakdown",
+                    # "title": "Weight Breakdown",
                     "xaxis": {"title": "Weight Categories"},
                     "yaxis": {"title": "Weight (lbs)"},
                 },
@@ -80,7 +80,7 @@ def combined_weight_plot(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [False, True]},
                 {
-                    "title": "Weight per Phase",
+                    # "title": "Weight per Phase",
                     "xaxis": {"title": "Flight Phases"},
                     "yaxis": {"title": "Weight (lbs)"},
                 },
@@ -103,7 +103,7 @@ def combined_weight_plot(segment_list: List[sg.segments]):
     fig.data[0].visible = True
     fig.data[1].visible = False
     fig.update_layout(
-        title="Weight Breakdown",
+        title="Weight Breakdown and Weight per Phase",
         xaxis_title="Weight Categories",
         yaxis_title="Weight (lbs)",
     )

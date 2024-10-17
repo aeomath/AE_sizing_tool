@@ -12,8 +12,26 @@ import Sizing.utils.utils as utils
 from Sizing.MissionProfile.segments import segments
 from typing import List
 
+"""
+This module provides functions for formatting and handling mission profile data for an aircraft sizing tool. 
+It includes functions to extract attributes from mission segments, generate JSON files, create phase objects 
+from provided data, and load mission profiles from JSON files.
+Functions:
+    extract_attributes(segment):
+        Extracts and orders attributes from a mission segment object.
+    generate_json(segment_list):
+        Generates a JSON file named 'Mission_Profile.json' containing mission data.
+    create_phase(phase_data):
+        Creates a phase object based on the provided phase data.
+    load_payload_and_crew_requirements(json_file_path) -> dict:
+        Loads payload and crew requirements from a JSON file.
+    generate_example_test():
+    load_mission_profile(json_file_path) -> List:
+        Loads a mission profile from a JSON file and creates a list of phase objects.
+"""
 
-def extract_attributes(segment):
+
+def extract_attributes(segment: segments) -> dict:
     attributes = segment.__dict__.copy()
     attributes["type"] = segment.__class__.__name__.lower()
     ordered_attributes = {
@@ -34,7 +52,7 @@ def extract_attributes(segment):
     return ordered_attributes
 
 
-def generate_json(segment_list):
+def generate_json(segment_list: List[segments]) -> None:
     """
     Generates a JSON file named 'inputs.json' containing mission data.
     Args:
@@ -50,7 +68,7 @@ def generate_json(segment_list):
         json.dump(mission_data, f, indent=4)
 
 
-def create_phase(phase_data):
+def create_phase(phase_data: dict) -> object:
     """
     Create a phase object based on the provided phase data.
     Parameters:
@@ -126,7 +144,7 @@ def generate_example_test():
         assert new_seg == real_segment
 
 
-def load_mission_profile(json_file_path) -> List:
+def load_mission_profile(json_file_path) -> List[segments]:
     with open(json_file_path, "r") as json_file:
         data = json.load(json_file)
     segments_list = []

@@ -64,7 +64,6 @@ def T_WS_WS_diagram(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [True, False]},
                 {
-                    "title": "Thrust-to-Weight Ratio per Phase",
                     "yaxis": {"title": "TWR"},
                 },
             ],
@@ -74,7 +73,7 @@ def T_WS_WS_diagram(segment_list: List[sg.segments]):
             "method": "update",
             "args": [
                 {"visible": [False, True]},
-                {"title": "Wing Loading per Phase", "yaxis": {"title": "WSR"}},
+                {"yaxis": {"title": "WSR"}},
             ],
         },
     ]
@@ -96,7 +95,7 @@ def T_WS_WS_diagram(segment_list: List[sg.segments]):
 
     # Update layout
     fig.update_layout(
-        title="Thrust-to-Weight Ratio per Phase",
+        title="Thrust-to-Weight Ratio and Wing Loading per Phase",
         xaxis_title="Flight Phases",
         yaxis_title="TWR",
         xaxis=dict(tickmode="array", tickvals=phases),
@@ -105,7 +104,7 @@ def T_WS_WS_diagram(segment_list: List[sg.segments]):
 
     if not os.path.exists("outputs"):
         os.mkdir("outputs")
-    fig.write_html("outputs/TWR_WSR_per_phase.html")
+    fig.write_html("outputs/TWR_and_WSR_per_phase.html")
     fig.show()
     return fig
 
@@ -186,6 +185,6 @@ def constraints_plots(
     )
     if not os.path.exists("outputs"):
         os.mkdir("outputs")
-    fig.write_html("outputs/TWR_vs_Wing_Loading.html")
+    fig.write_html("outputs/Constraint_analysis.html")
     # fig.write_image("outputs/TWR_vs_Wing_Loading.png")
     fig.show()

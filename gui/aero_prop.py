@@ -37,7 +37,7 @@ def plots_aero_prop(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [True, False, False, False, False]},
                 {
-                    "title": "Lift-to-Drag Ratios per Phase",
+                    # "title": "Lift-to-Drag Ratios per Phase",
                     "yaxis": {"title": "Lift-to-Drag Ratio"},
                 },
             ],
@@ -47,7 +47,7 @@ def plots_aero_prop(segment_list: List[sg.segments]):
             "method": "update",
             "args": [
                 {"visible": [False, True, False, False, False]},
-                {"title": "TSFC per Phase", "yaxis": {"title": "TSFC"}},
+                {"yaxis": {"title": "TSFC"}},
             ],
         },
         {
@@ -56,7 +56,7 @@ def plots_aero_prop(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [False, False, True, False, False]},
                 {
-                    "title": "Lift Coefficients per Phase",
+                    # "title": "Lift Coefficients per Phase",
                     "yaxis": {"title": "Lift Coefficient"},
                 },
             ],
@@ -67,7 +67,7 @@ def plots_aero_prop(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [False, False, False, True, False]},
                 {
-                    "title": "Drag Coefficients per Phase",
+                    # "title": "Drag Coefficients per Phase",
                     "yaxis": {"title": "Drag Coefficient"},
                 },
             ],
@@ -152,7 +152,7 @@ def plots_aero_prop(segment_list: List[sg.segments]):
 
     # Update layout
     fig.update_layout(
-        title="Lift-to-Drag Ratios per Phase",
+        title="Aerodynamic and Propulsion Characteristics per Phase",
         xaxis_title="Flight Phases",
         yaxis_title="Lift-to-Drag Ratio",
         xaxis=dict(tickmode="array", tickvals=names),
@@ -160,6 +160,6 @@ def plots_aero_prop(segment_list: List[sg.segments]):
 
     if not os.path.exists("outputs"):
         os.mkdir("outputs")
-    fig.write_html("outputs/lift_drag_ratios_per_phase.html")
+    fig.write_html("outputs/aero_and_prop_characteristics.html")
     fig.show()
     return fig

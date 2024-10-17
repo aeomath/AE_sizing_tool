@@ -4,10 +4,15 @@ from Sizing.Mission_analysis import Main_Mission_Parametric
 from Sizing.constraint_analysis import Constraints_Parametric
 from Sizing.MissionProfile.segments import segments
 from tqdm import tqdm
+from typing import List
 
 
 def Iter_Beta(
-    segments_list, max_iteration=20, tolerance=0.001, WSR_guess=110, TWR_guess=0.3
+    segments_list: List[segments],
+    max_iteration=20,
+    tolerance=0.001,
+    WSR_guess=110,
+    TWR_guess=0.3,
 ):
     WSR = WSR_guess
     TWR = TWR_guess
@@ -16,7 +21,7 @@ def Iter_Beta(
     betas_list = []
 
     for i in range(max_iteration):
-        tqdm.write(f"Starting iteration {i} for Beta loop")
+        tqdm.write(f"Starting iteration {i} for Beta loop, WSR: {WSR}, TWR: {TWR}")
         betas_list = Main_Mission_Parametric.Compute_Mission_Profile_Parametric(
             WSR, TWR, segments_list=segments_list
         )
@@ -27,6 +32,7 @@ def Iter_Beta(
         TWR = constraints[1]
         if np.abs(WSR - WSR_old) < tolerance and np.abs(TWR - TWR_old) < tolerance:
             print(f"Convergence reached at iteration {i}")
+            print(f"WSR final: {WSR}, TWR final: {TWR}")
             break
         WSR_old = WSR
         TWR_old = TWR

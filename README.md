@@ -105,6 +105,7 @@ After Running the tool , mains results will be printed in a console graphs will 
 * The first graph shows the constraints analysis plot.
 * The second graph shows the Weight_Breakdown and the weight decomposition.
 * The third graph shows some aerodynamics and propulsion characteristics. A dropdown menu is available to select the parameter to display.
+* The fourth graph shows the instantaneous T/W and W/S ratios for each segment.
 > The graphs are interactive, and you can zoom in and out, pan, and save them as images.
 > All data you see on this graph are datas at the end of the segment.
 >**If the graphs are not displayed, please refresh the page (F5) where the graphs are displayed. (sometimes Plotly has issues with displaying the graphs)**

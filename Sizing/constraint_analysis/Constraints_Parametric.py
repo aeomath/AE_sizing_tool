@@ -67,9 +67,9 @@ def constraint_analysis_main(segment_list: List[segments], plot=False):
         TWR_design = float(y_max[landing_index])
         print("Landing constraint is more restrictive than the design point")
 
-    print(
-        f"Design Point: Wing Loading = {wing_loading_design} lb/ft^2, TWR = {TWR_design}"
-    )
+    # print(
+    #     f"Design Point: Wing Loading = {wing_loading_design} lb/ft^2, TWR = {TWR_design}"
+    # )
     return (
         wing_loading_design,
         TWR_design,
