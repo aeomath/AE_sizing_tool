@@ -144,6 +144,21 @@ After Running the tool , mains results will be printed in a console and graphs w
 
 ### Output folder ### 
 All the results will be saved in the `outputs` folder in  HTML files you can open it in your browser.
+1. ``aero_and_prop_characteristics.html``
+   This graph plots several aerodynamics and propulsion characteristics.
+   
+2. ``combined_weight_plot.html``
+   This graph shows the converged weight breakdown and plots the weight of the aircraft at each phase.
+   
+3. ``Constraint_analysis.html``
+   This is the constraint analysis plot.
+   
+4. ``final_design_results.html`` 
+   This file summarizes the value of the main variables computed by the tool (WSR, TWR, Wingspan, Wing Area, TOW ...).
+   
+5. ``TWR_and_WSR_per_phase.html``
+   This graph shows the instantaneous T/W and W/S ratios for each segment.
+
 ## Contributing ##
 
 Contributions are welcome! Please fork the repository and create a pull request.
