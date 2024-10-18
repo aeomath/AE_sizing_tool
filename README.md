@@ -41,6 +41,7 @@ To install the tool, follow these steps. Two options are available to install th
     Using venv
      ```bash
      python -m venv venv
+     venv\Scripts\activate
      ```
      or using conda
      ```bash
@@ -61,15 +62,18 @@ To install the tool, follow these steps. Two options are available to install th
    Using venv
     ```bash
     python -m venv venv
+    venv\Scripts\activate
     ```
     or using conda
     ```bash
     conda create --name venv python=3.10
+    conda activate venv 
     ```
 4. Install the required dependencies **in your environment** :
     ```bash
     (env)$ pip install -r requirements.txt
     ```
+    > The installation of the library could take up to 5min :)
 
 ## Usage ##
 
