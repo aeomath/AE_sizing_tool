@@ -37,6 +37,19 @@ To install the tool, follow these steps. Two options are available to install th
     ```bash
     cd AE_sizing_tool
     ```
+3. Create a virtual environment using conda or venv (using Python 3.10 if possible):
+    Using venv
+     ```bash
+     python -m venv venv
+     ```
+     or using conda
+     ```bash
+     conda create --name venv python=3.10
+     ```
+4. Install the required dependencies **in your environment** :
+    ```bash
+    (env)$ pip install -r requirements.txt
+    ```
 
 ### Option 2: Downloading the zip file ###
 

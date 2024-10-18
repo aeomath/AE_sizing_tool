@@ -163,7 +163,7 @@ def print_Final_Design():
             </tr>
             <tr>
                 <td>Wing Aspect ratio </td>
-                <td>{Aircraft.Geometry.Wing.Aspect_Ratio.unit}</td>
+                <td>{Aircraft.Geometry.Wing.Aspect_Ratio.value}</td>
                 <td>{Aircraft.Geometry.Wing.Aspect_Ratio.unit}</td>
             </tr>  
             <tr>
