@@ -265,6 +265,18 @@ class Loiter(segments):
         )
 
     def wf_wi(self, WSR, TWR):
+        """
+        Calculate the weight fraction (wf/wi) for the cruise segment of the mission profile.
+        Parameters:
+        WSR (float): Wing loading (weight-to-surface ratio).
+        TWR (float): Thrust-to-weight ratio.
+        Returns:
+        float: The weight fraction (wf/wi) for the cruise segment.
+        The calculation is based on the exponential of the product of the thrust specific fuel consumption (tsfc),
+        the time in minutes, and a factor involving aerodynamic coefficients (K1, K2, and Cd0).
+        See section V.E of the report for more details.
+        """
+
         return np.exp(
             -self.tsfc(WSR)
             * self.time.value
