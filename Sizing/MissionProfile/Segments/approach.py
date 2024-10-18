@@ -68,6 +68,25 @@ class approach(segments):
         return (alpha_start + alpha_end) / 2
 
     def Thrust_Weight_Ratio(self, wing_loading):
+        """
+        Calculate the thrust-to-weight ratio for the approach segment of the mission profile.
+        See section V.G of the report for more details.
+        Parameters:
+        -----------
+        wing_loading : float
+            The wing loading value (weight per unit wing area).
+        Returns:
+        --------
+        float
+            The thrust-to-weight ratio for the approach segment.
+        Notes:
+        ------
+        - The calculation takes into account the weight fraction constraint, equivalent airspeed (EAS),
+          flight path angle, aerodynamic coefficients (K1, K2), and zero-lift drag coefficient (Cd0).
+        - The fuel flow percentage used during the approach segment is also considered.
+        - The flight path angle is expected to be negative (descending), and the input should be positive.
+        """
+
         beta = self.weight_fraction_constraint.value  ## Constraint on weight fraction
         speed_EAS = self.KEAS.value
         flight_path_angle = self.flight_path_angle.value
@@ -81,7 +100,9 @@ class approach(segments):
             * utils.knots_to_fts(speed_EAS) ** 2
         )
         Cd0 = self.Cd0()
-        alpha = self.percent_fuel_flow.value
+        alpha = (
+            self.percent_fuel_flow.value
+        )  ## 20% of the fuel flow is used during the approach segment
         linear_term = K1 * (beta / q) * wing_loading
         Inverse_ter = Cd0 / ((beta / q) * wing_loading)
         T_W = (beta / alpha) * (
@@ -142,15 +163,15 @@ class approach(segments):
 
     def wf_wi(self, WSR, TWR):
         """
-        Calculate the weight fraction during the approach phase of a mission.
+        Calculate the weight fraction for a given wing loading and thrust-to-weight ratio.
+        See section V.H of the report for more details
         Parameters:
-        WSR (float): Wing loading ratio.
+        WSR (float): Wing loading (Wing Surface Ratio).
         TWR (float): Thrust-to-weight ratio.
-        Mission (Mission_segments.climb): An instance of the approach segment containing mission-specific parameters.
         Returns:
-        float: The weight fraction after the climb phase. Wendclimb/Wstart
-        The function takes into account the climb segment of the mission.
+        float: The weight fraction after the approach segment.
         """
+
         alpha = self.alpha()
         beta = self.weight_fraction.value
         return np.exp(-self.tsfc(WSR) * alpha / beta * TWR * self.delta_t())

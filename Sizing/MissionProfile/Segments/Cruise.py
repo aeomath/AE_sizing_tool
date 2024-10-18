@@ -206,6 +206,24 @@ class Loiter(segments):
     ### Best L/D speed calculation
 
     def iter_best_L_D_speed_EAS(self, Wing_Loading):
+        """
+        Iteratively calculates the best lift-to-drag speed in Equivalent Airspeed (EAS) for a given wing loading.
+        Parameters:
+        -----------
+        Wing_Loading : float
+            The wing loading value (weight per unit area of the wing).
+        Returns:
+        --------
+        float
+            The best lift-to-drag speed in knots.
+        Notes:
+        ------
+        This function uses an iterative approach to find the best lift-to-drag speed by adjusting the Mach number
+        until convergence is achieved within a specified tolerance. The iteration is limited to a maximum number
+        of iterations to prevent infinite loops.
+        See section VI.E  of the report for more details.
+        """
+
         # print("getting best L/D speed...")
         ### best lift to drag speed
         def Best_L_D_speed_EAS(Wing_Loading, Cd0, beta):  ### best lift to drag speed

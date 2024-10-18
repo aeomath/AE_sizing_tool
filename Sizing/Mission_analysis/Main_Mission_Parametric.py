@@ -2,10 +2,7 @@ from Sizing.MissionProfile.segments import segments
 import Sizing.MissionProfile.Segments.acceleration as acceleration_segment
 import Sizing.MissionProfile.Segments.Cruise as cruise_segment
 import Sizing.MissionProfile.Segments.Climb as climb_segment
-import Sizing.MissionProfile.Segments.Takeoff as takeoff_segment
 import Sizing.MissionProfile.Segments.approach as approach_segment
-import Sizing.MissionProfile.Segments.landing as landing_segment
-import Sizing.MissionProfile.Segments.Taxi as taxi_segment
 from typing import List
 from tqdm import tqdm
 

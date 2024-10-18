@@ -4,12 +4,14 @@ import os
 import json as js
 
 """
-This code defines the variables used in the aircraft sizing project, Those of the varaiable used
-to design aircraft. Once the aircraft is fixed, they are fixed.
+This code defines the variables used in the aircraft sizing project, Those are the varaiable used
+to design the aircraft. Once the aircraft is fixed, they are fixed.
 - `Aircraft` class represents the aircraft and contains nested classes for different components.
 - `Design` class represents the design variables of the aircraft.
 
-Author: Adam Benabou 
+First we define the constants and the path to the JSON files that contain the input data for the
+aerodynamics, propulsion, and structure of the aircraft. We then load the data from these files and
+assign the values to the corresponding variables.
 """
 ### Constants
 # Get the directory of the current script

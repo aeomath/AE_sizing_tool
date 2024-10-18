@@ -10,7 +10,7 @@ import os
 def plots_aero_prop(segment_list: List[sg.segments]):
     """
     Generates a chart representing the lift-to-drag ratios of an aircraft for different flight phases.
-    The function retrieves the lift-to-drag ratios for each flight phase from the Aircraft design and creates
+    The function retrieves the lift-to-drag ratios for each flight phase and creates
     a chart using Plotly to visualize these ratios. The chart is saved as an HTML file in the "outputs"
     directory and is also displayed in the browser.
     Returns:
@@ -78,7 +78,7 @@ def plots_aero_prop(segment_list: List[sg.segments]):
             "args": [
                 {"visible": [False, False, False, False, True]},
                 {
-                    "title": "Thrust per Phase",
+                    # "title": "Thrust per Phase",
                     "yaxis": {"title": "Thrust"},
                 },
             ],

@@ -76,11 +76,31 @@ def Mach_to_KEAS(Mach, altitude, meter=False):
 
 
 def KEAS_to_TAS(KEAS, altitude, meter=False):
+    """
+    Convert Knots Equivalent Airspeed (KEAS) to True Airspeed (TAS).
+    Parameters:
+    KEAS (float): Knots Equivalent Airspeed.
+    altitude (float): Altitude at which the conversion is to be made.
+    meter (bool, optional): If True, altitude is given in meters. If False, altitude is given in feet. Default is False.
+    Returns:
+    float: True Airspeed (TAS) in knots.
+    """
+
     atm = Atmosphere(altitude, meter)
     return KEAS / np.sqrt(atm.density_ratio.value)
 
 
 def TAS_to_KEAS(TAS, altitude, meter=False):
+    """
+    Convert True Airspeed (TAS) to Knots Equivalent Airspeed (KEAS).
+    Parameters:
+    TAS (float): True Airspeed in knots.
+    altitude (float): Altitude at which the conversion is to be made.
+                      If meter is False, altitude is in feet; otherwise, in meters.
+    meter (bool, optional): If True, altitude is given in meters. Defaults to False.
+    Returns:
+    float: Knots Equivalent Airspeed (KEAS).
+    """
     atm = Atmosphere(altitude, meter)
     return TAS * np.sqrt(atm.density_ratio.value)
 

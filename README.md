@@ -1,14 +1,33 @@
 # AE_sizing_tool
+[![Author Badge](https://img.shields.io/badge/Author-Adam%20Benabou-blue?style=for-the-badge&logo=github&logoColor=white&labelColor=blue&color=blue&link=https://github.com/aeomath)](https://github.com/aeomath) ![Date Badge](https://img.shields.io/badge/Date-October%202023-orange?style=for-the-badge&logo=github&logoColor=white&labelColor=orange&color=orange&link=https://github.com/aeomath) 
 
-## Description
+[![Institution Badge](https://img.shields.io/badge/Institution-Georgia%20Institute%20of%20Technology-yellow?style=for-the-badge&logo=github&logoColor=white&labelColor=yellow&color=yellow&link=https://ae.gatech.edu/)](https://ae.gatech.edu/)
+
+![Python Badge](https://img.shields.io/badge/Python-3.10-blue?style=for-the-badge&logo=python&logoColor=white&labelColor=blue&color=blue)
+
 
 This project is a sizing tool developed for the AE6343 course at Georgia Institute of Technology. It aims to assist in the preliminary design and sizing of aerospace vehicles. The tool might not be accurate and could contain errors. A detailed report is available to explain the process of the tool design.
 
-## Installation
+
+## Table of Contents ##
+
+1. [Installation](#installation)
+    - [Option 1: Using git](#option-1-using-git)
+    - [Option 2: Downloading the zip file](#option-2-downloading-the-zip-file)
+2. [Usage](#usage)
+    - [Use the existing example](#use-the-existing-example)
+    - [Input your own parameters](#input-your-own-parameters)
+3. [Output](#output)
+    - [Output folder](#output-folder)
+    
+4. [Contributing](#contributing)
+
+
+## Installation ##
 
 To install the tool, follow these steps. Two options are available to install the tool.
 
-### Option 1: Using git
+### Option 1: Using  git ###
 
 1. Clone the repository:
     ```bash
@@ -19,7 +38,7 @@ To install the tool, follow these steps. Two options are available to install th
     cd AE_sizing_tool
     ```
 
-### Option 2: Downloading the zip file
+### Option 2: Downloading the zip file ###
 
 1. Unzip the downloaded file and navigate to the project directory:
     ```bash
@@ -39,11 +58,11 @@ To install the tool, follow these steps. Two options are available to install th
     (env)$ pip install -r requirements.txt
     ```
 
-## Usage
+## Usage ##
 
 To use the tool, you need inputs. Inputs are located in the `Inputs` folder in JSON files.
 
-### Use the existing example
+### Use the existing example ###
 
 A set of example input files are provided in the `Inputs` folder. These files contain the necessary parameters for the sizing calculations for the mission given in the project for an A320. You can use these files to test the tool and see how it works.
 
@@ -53,7 +72,7 @@ python Main.py
 ```
 > Run time can take up to 2 minutes depending on the computer's performance. Please be patient. A prohgress bar will be displayed in the console to show the progress of the calculations. usually, the numbers of iterations are 3.
 
-### Input your own parameters
+### Input your own  ###
 
 If you want to use your own parameters, you can create your own input files. You need to provide input files in JSON format. These input files should be placed in the `Inputs` folder. Each JSON file should contain the necessary parameters for the sizing calculations.
 
@@ -99,9 +118,9 @@ To run the tool with your own input files, be careful to modify the name of the 
 ```bash
 python Main.py < My_Mission_Profile.json >
 ```
-## Output
+## Output ##
 
-After Running the tool , mains results will be printed in a console graphs will be generated 
+After Running the tool , mains results will be printed in a console and graphs will be generated 
 * The first graph shows the constraints analysis plot.
 * The second graph shows the Weight_Breakdown and the weight decomposition.
 * The third graph shows some aerodynamics and propulsion characteristics. A dropdown menu is available to select the parameter to display.
@@ -112,6 +131,6 @@ After Running the tool , mains results will be printed in a console graphs will 
 
 ### Output folder ### 
 All the results will be saved in the `outputs` folder in  HTML files you can open it in your browser.
-## Contributing
+## Contributing ##
 
 Contributions are welcome! Please fork the repository and create a pull request.
